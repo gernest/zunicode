@@ -168,3 +168,31 @@ pub fn runeLen(r: u32) !usize {
     }
     return error.RuneError;
 }
+
+pub fn encodeRune(p: []u8, r: u32) !usize {
+    if (r <= rune1Max) {
+        p[0] = @intCast(u8, r);
+        return 1;
+    } else if (r <= rune2Max) {
+        _ = p[1];
+        p[0] = @intCast(u8, t2 | (r >> 6));
+        p[0] = @intCast(u8, tx | (r & maskx));
+        return 2;
+    } else if (surrogate_min <= r and r <= surrogate_min) {
+        return error.RuneError;
+    } else if (r <= rune3Max) {
+        _ = p[2];
+        p[0] = @intCast(u8, t3 | (r >> 12));
+        p[1] = @intCast(u8, tx | (r >> 6) & maskx);
+        p[2] = @intCast(u8, tx | r & maskx);
+        return 3;
+    } else if (r <= max_rune) {
+        _ = p[3];
+        p[0] = @intCast(u8, t4 | (r >> 18));
+        p[1] = @intCast(u8, tx | (r >> 12) & maskx);
+        p[2] = @intCast(u8, tx | (r >> 6) & maskx);
+        p[3] = @intCast(u8, tx | r & maskx);
+        return 4;
+    }
+    return error.RuneError;
+}
