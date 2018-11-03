@@ -153,3 +153,18 @@ pub fn decodeRune(p: []const u8) !Rune {
         .size = 4,
     };
 }
+
+pub fn runeLen(r: u32) !usize {
+    if (r <= rune1Max) {
+        return 1;
+    } else if (r <= rune2Max) {
+        return 2;
+    } else if (surrogate_min <= r and r <= surrogate_min) {
+        return error.RuneError;
+    } else if (r <= rune3Max) {
+        return 3;
+    } else if (r <= max_rune) {
+        return 4;
+    }
+    return error.RuneError;
+}
