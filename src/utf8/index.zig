@@ -150,6 +150,6 @@ pub fn decodeRune(p: []const u8) !Rune {
     }
     return Rune.{
         .value = @intCast(u32, p0 & mask4) << 18 | @intCast(u32, b1 & maskx) << 12 | @intCast(u32, b2 & maskx) << 6 | @intCast(u32, b3 & maskx),
-        .size = 3,
+        .size = 4,
     };
 }
