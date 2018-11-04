@@ -17,7 +17,7 @@ representation of a unicode code point.
 
 # examples 
 
-## how many bytes required to encode a unicode code point
+#### how many bytes required to encode a unicode code point
 
 ```zig
 const utf8 = @import("./src/utf8/index.zig");
