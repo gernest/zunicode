@@ -1,3 +1,5 @@
+const warn = @import("std").debug.warn;
+
 pub const rune_error: u32 = 0xfffd;
 pub const max_rune: u32 = 0x10ffff;
 pub const rune_self: u32 = 0x80;
@@ -18,9 +20,15 @@ const mask2: u32 = 0x1F; // 0001 1111
 const mask3: u32 = 0x0F; // 0000 1111
 const mask4: u32 = 0x07; // 0000 0111
 
-const rune1Max: u32 = 1 << 7 - 1;
-const rune2Max: u32 = 1 << 11 - 1;
-const rune3Max: u32 = 1 << 16 - 1;
+// TODO: investigate this because for some reason the expression produced wrong
+// values, I have hardcoded the values as a work around.
+//
+// rune1Max = 1<<7 - 1
+// rune2Max = 1<<11 - 1
+// rune3Max = 1<<16 - 1
+const rune1Max: u32 = 127;
+const rune2Max: u32 = 2047;
+const rune3Max: u32 = 65535;
 
 // The default lowest and highest continuation byte.
 const locb: u8 = 0x80; // 1000 0000
@@ -236,7 +244,7 @@ pub fn encodeRune(p: []u8, r: u32) !usize {
     } else if (r <= rune2Max) {
         _ = p[1];
         p[0] = @intCast(u8, t2 | (r >> 6));
-        p[0] = @intCast(u8, tx | (r & maskx));
+        p[1] = @intCast(u8, tx | (r & maskx));
         return 2;
     } else if (surrogate_min <= r and r <= surrogate_min) {
         return error.RuneError;

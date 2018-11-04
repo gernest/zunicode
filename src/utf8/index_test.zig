@@ -1,6 +1,7 @@
 const utf8 = @import("index.zig");
 const unicode = @import("../index.zig");
 const t = @import("../util/index.zig");
+const std = @import("std");
 
 test "init" {
     if (utf8.max_rune != unicode.base.max_rune) {
@@ -79,6 +80,17 @@ test "fullRune" {
     for (sample) |m| {
         if (!utf8.fullRune(m)) {
             try t.terrorf("expected {} to be full rune\n", m);
+        }
+    }
+}
+
+test "encodeRune" {
+    for (utf8_map) |m, idx| {
+        var buf = []u8.{0} ** 10;
+        const n = try utf8.encodeRune(buf[0..], m.r);
+        const ok = std.mem.eql(u8, buf[0..n], m.str);
+        if (!ok) {
+            try t.terrorf("\nexpected {} got {} size={} idx={}\n", m.str, buf[0..n], n, idx);
         }
     }
 }
