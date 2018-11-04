@@ -130,7 +130,7 @@ pub fn decodeRune(p: []const u8) !Rune {
         // The following code simulates an additional check for x == xx and
         // handling the ASCII and invalid cases accordingly. This mask-and-or
         // approach prevents an additional branch.
-        const mask = @intCast(u32) << 31 >> 31;
+        const mask = @intCast(u32, x) << 31 >> 31;
         return Rune.{
             .value = @intCast(u32, p[0]) & ~mask | rune_error & mask,
             .size = 1,
@@ -162,7 +162,7 @@ pub fn decodeRune(p: []const u8) !Rune {
         };
     }
     const b3 = p[3];
-    if (b3 < locb or hicb < be) {
+    if (b3 < locb or hicb < b3) {
         return error.RuneError;
     }
     return Rune.{
@@ -264,3 +264,24 @@ pub fn encodeRune(p: []u8, r: u32) !usize {
     }
     return error.RuneError;
 }
+
+pub const Iterator = struct.{
+    src: []const u8,
+    pos: usize,
+
+    pub fn init(src: []const u8) Iterator {
+        return Iterator.{
+            .src = src,
+            .pos = 0,
+        };
+    }
+
+    pub fn next(self: *Iterator) !?Rune {
+        if (self.pos >= self.src.len) {
+            return null;
+        }
+        const rune = try decodeRune(self.src[self.pos..]);
+        self.pos += rune.size;
+        return rune;
+    }
+};
