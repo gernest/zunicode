@@ -15,4 +15,28 @@ This is a concept borrowed from go. It is an alias for `u32` which is a
 representation of a unicode code point.
 
 
+# examples 
+
+## how many bytes required to encode a unicode code point
+
+```zig
+const utf8 = @import("./src/utf8/index.zig");
+const warn = @import("std").debug.warn;
+
+test "ExampleRuneLen" {
+    warn("\n{}\n", try utf8.runeLen('a'));
+    warn("{}\n", try utf8.runeLen(0x754c)); // chinese character 0x754c 界
+
+    // Test 1/1 ExampleRuneLen...
+    // 1
+    // 3
+    // OK
+}
+```
+
+## notes
+
+For some reason it is not possible to define some other characters using `'界'`,
+so I have used the character's hex values instead.
+
 
