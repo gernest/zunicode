@@ -1,6 +1,7 @@
 pub const rune_error: u32 = 0xfffd;
 pub const max_rune: u32 = 0x10ffff;
 pub const rune_self: u32 = 0x80;
+pub const utf_max: usize = 4;
 
 const surrogate_min: u32 = 0xD800;
 const surrogate_max: u32 = 0xDFFF;
@@ -175,6 +176,57 @@ pub fn runeLen(r: u32) !usize {
         return 4;
     }
     return error.RuneError;
+}
+
+/// runeStart reports whether the byte could be the first byte of an encoded,
+/// possibly invalid rune. Second and subsequent bytes always have the top two
+/// bits set to 10.
+pub fn runeStart(b: u8) bool {
+    return b & 0xC0 != 0x80;
+}
+
+// decodeLastRune unpacks the last UTF-8 encoding in p and returns the rune and
+// its width in bytes. If p is empty it returns RuneError. Otherwise, if
+// the encoding is invalid, it returns RuneError Both are impossible
+// results for correct, non-empty UTF-8.
+//
+// An encoding is invalid if it is incorrect UTF-8, encodes a rune that is
+// out of range, or is not the shortest possible UTF-8 encoding for the
+// value. No other validation is performed.
+pub fn decodeLastRune(p: []const u8) !Rune {
+    const end = p.len;
+    if (end < 1) {
+        return error.RuneError;
+    }
+    var start = end - 1;
+    const r = @intCast(u32, p[start]);
+    if (r < rune_self) {
+        return Rune.{
+            .value = r,
+            .size = 1,
+        };
+    }
+    // guard against O(n^2) behavior when traversing
+    // backwards through strings with long sequences of
+    // invalid UTF-8.
+    var lim = end - utf_max;
+    if (lim < 0) {
+        lim = 0;
+    }
+    while (start >= lim) {
+        if (runeStart(p[start])) {
+            break;
+        }
+        start -= 1;
+    }
+    if (start < 0) {
+        start = 0;
+    }
+    var rune = try decodeRune(p[start..end]);
+    if (start + rune.size != end) {
+        return error.RuneError;
+    }
+    return rune;
 }
 
 pub fn encodeRune(p: []u8, r: u32) !usize {
