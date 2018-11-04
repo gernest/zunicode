@@ -1,7 +1,7 @@
 # zunicode
 
 This package provided functions for working with unicode code points. It is the
-goa of the package to be low lever, offering primitives for working with
+goal of the package to be low level, offering primitives for working with
 unicode in the `ziglang`.
 
 The source was ported from go standard unicode package. The port was done by
