@@ -1,4 +1,4 @@
-const base = @import("base.zig");
+pub const base = @import("base.zig");
 const letter = @import("letter.zig");
 const tables = @import("tables.zig");
 const warn = @import("std").debug.warn;
