@@ -102,6 +102,14 @@ pub const Rune = struct.{
     size: usize,
 };
 
+/// decodeRune unpacks the first UTF-8 encoding in p and returns the rune and
+/// its width in bytes. If p is empty it returns RuneError. Otherwise, if
+/// the encoding is invalid, it returns RuneError. Both are impossible
+/// results for correct, non-empty UTF-8.
+///
+/// An encoding is invalid if it is incorrect UTF-8, encodes a rune that is
+/// out of range, or is not the shortest possible UTF-8 encoding for the
+/// value. No other validation is performed.
 pub fn decodeRune(p: []const u8) !Rune {
     const n = p.len;
     if (n < 1) {
