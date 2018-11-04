@@ -38,6 +38,10 @@ test "ExampleRuneLen" {
 ##### check what type of characters you are dealing with
 
 ```zig
+const utf8 = @import("./src/utf8/index.zig");
+const unicode = @import("./src/index.zig");
+const warn = @import("std").debug.warn;
+
 test "Example_is" {
     const mixed = "\t5Ὂg̀9! ℃ᾭG";
     var iter = utf8.Iterator.init(mixed);
