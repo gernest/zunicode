@@ -153,4 +153,7 @@ test "Example_is" {
 For some reason it is not possible to define some other characters using `'界'`,
 so I have used the character's hex values instead.
 
-
+Many functions in the go unicode package are found in pairs , one for byte
+slice and one for strings. Since there is no concept of strings in zig, I have
+intentionally omitted the string functions and only port operations over byte
+slice `[] const u8` or `[]u8`.
