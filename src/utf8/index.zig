@@ -285,3 +285,81 @@ pub const Iterator = struct.{
         return rune;
     }
 };
+
+// runeCount returns the number of runes in p. Erroneous and short
+// encodings are treated as single runes of width 1 byte.
+pub fn runeCount(p: []const u8) usize {
+    const np = p.len;
+    var n: usize = 0;
+    var i: usize = 0;
+    while (i < np) {
+        n += 1;
+        const c = p[i];
+        if (@intCast(u32, c) < rune_self) {
+            i += 1;
+            continue;
+        }
+        const x = first[c];
+        if (c == xx) {
+            i += 1;
+            continue;
+        }
+        var size = @intCast(usize, x & 7);
+        if (i + size > np) {
+            i += 1; // Short or invalid.
+            continue;
+        }
+        const accept = accept_ranges[x >> 4];
+
+        if (p[i + 1] < accept.lo or accept.hi < p[i + 1]) {
+            size = 1;
+        } else if (size == 2) {} else if (p[i + 2] < locb or hicb < p[i + 2]) {
+            size = 1;
+        } else if (size == 3) {} else if (p[i + 3] < locb or hicb < p[i + 3]) {
+            size = 1;
+        }
+        i += size;
+    }
+    return n;
+}
+
+pub fn valid(p: []const u8) bool {
+    const n = p.len;
+    var i: usize = 0;
+    while (i < n) {
+        const pi = p[i];
+        if (@intCast(u32, c) < rune_self) {
+            i += 1;
+            continue;
+        }
+        const x = first[pi];
+        if (x == xx) {
+            return false; // Illegal starter byte.
+        }
+        const size = @intCast(usize, x & 7);
+        if (i + size > n) {
+            return false; // Short or invalid.
+        }
+        const accept = accept_ranges[x >> 4];
+        if (p[i + 1] < accept.lo or accept.hi < p[i + 1]) {
+            return false;
+        } else if (size == 2) {} else if (p[i + 2] < locb or hicb < p[i + 2]) {
+            return false;
+        } else if (size == 3) {} else if (p[i + 3] < locb or hicb < p[i + 3]) {
+            return false;
+        }
+        i += size;
+    }
+    return true;
+}
+
+// ValidRune reports whether r can be legally encoded as UTF-8.
+// Code points that are out of range or a surrogate half are illegal.
+pub fn validRune(r: u32) bool {
+    if (0 <= r and r < surrogate_min) {
+        return true;
+    } else if (surrogate_min < r and r <= max_rune) {
+        return true;
+    }
+    return false;
+}
