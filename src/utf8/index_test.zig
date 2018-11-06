@@ -56,7 +56,7 @@ const utf8_map = []Utf8Map.{
     Utf8Map.init(0xFFFD, "\xef\xbf\xbd"),
 };
 
-const surrogete_map = []UTF8Map.{
+const surrogete_map = []Utf8Map.{
     Utf8Map.init(0xd800, "\xed\xa0\x80"),
     Utf8Map.init(0xdfff, "\xed\xbf\xbf"),
 };
@@ -91,6 +91,33 @@ test "encodeRune" {
         const ok = std.mem.eql(u8, buf[0..n], m.str);
         if (!ok) {
             try t.terrorf("\nexpected {} got {} size={} idx={}\n", m.str, buf[0..n], n, idx);
+        }
+    }
+}
+
+test "decodeRune" {
+    for (utf8_map) |m| {
+        const r = try utf8.decodeRune(m.str);
+        if (r.value != m.r) {
+            try t.terror("got wrong rune");
+        }
+        if (r.size != m.str.len) {
+            try t.terror("got wrong size");
+        }
+    }
+}
+
+test "surrogateRune" {
+    for (surrogete_map) |m| {
+        var has_error: bool = false;
+        if (utf8.decodeRune(m.str)) {} else |err| switch (err) {
+            error.RuneError => {
+                has_error = true;
+            },
+            else => unreachable,
+        }
+        if (!has_error) {
+            try t.terror("expected an error");
         }
     }
 }
