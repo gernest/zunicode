@@ -2,10 +2,10 @@ const base = @import("base.zig");
 const letter = @import("letter.zig");
 const tables = @import("tables.zig");
 const unicode = @import("index.zig");
-const t = @import("../testing/index.zig");
+const t = @import("./util/index.zig");
 const warn = @import("std").debug.warn;
 
-const notletterTest = []u32.{
+const notletterTest = []i32.{
     0x20,
     0x35,
     0x375,
@@ -16,7 +16,7 @@ const notletterTest = []u32.{
     0x1ffff,
     0x10ffff,
 };
-const upper_test = []u32.{
+const upper_test = []i32.{
     0x41,
     0xc0,
     0xd8,
@@ -40,7 +40,7 @@ const upper_test = []u32.{
     0x1d400,
     0x1d7ca,
 };
-const notupperTest = []u32.{
+const notupperTest = []i32.{
     0x40,
     0x5b,
     0x61,
@@ -73,9 +73,9 @@ test "isUpper" {
 
 const caseT = struct.{
     case: base.Case,
-    in: u32,
-    out: u32,
-    fn init(case: base.Case, in: u32, out: u32) caseT {
+    in: i32,
+    out: i32,
+    fn init(case: base.Case, in: i32, out: i32) caseT {
         return caseT.{ .case = case, .in = in, .out = out };
     }
 };
@@ -243,7 +243,7 @@ test "to" {
 }
 
 test "isControlLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isControl(i);
         var want: bool = false;
@@ -260,7 +260,7 @@ test "isControlLatin1" {
 }
 
 test "isLetterLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isLetter(i);
         const want = letter.is(tables.Letter, i);
@@ -272,7 +272,7 @@ test "isLetterLatin1" {
 }
 
 test "isUpperLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isUpper(i);
         const want = letter.is(tables.Upper, i);
@@ -284,7 +284,7 @@ test "isUpperLatin1" {
 }
 
 test "isLowerLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isLower(i);
         const want = letter.is(tables.Lower, i);
@@ -296,7 +296,7 @@ test "isLowerLatin1" {
 }
 
 test "isNumberLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isNumber(i);
         const want = letter.is(tables.Number, i);
@@ -308,7 +308,7 @@ test "isNumberLatin1" {
 }
 
 test "isPrintLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isPrint(i);
         var want = unicode.in(i, unicode.print_ranges[0..]);
@@ -323,7 +323,7 @@ test "isPrintLatin1" {
 }
 
 test "isGraphicLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isGraphic(i);
         var want = unicode.in(i, unicode.graphic_ranges[0..]);
@@ -335,7 +335,7 @@ test "isGraphicLatin1" {
 }
 
 test "isPunctLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isPunct(i);
         const want = letter.is(tables.Punct, i);
@@ -347,7 +347,7 @@ test "isPunctLatin1" {
 }
 
 test "isSpaceLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isSpace(i);
         const want = letter.is(tables.White_Space, i);
@@ -359,7 +359,7 @@ test "isSpaceLatin1" {
 }
 
 test "isSymbolLatin1" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isSymbol(i);
         const want = letter.is(tables.Symbol, i);
@@ -370,7 +370,7 @@ test "isSymbolLatin1" {
     }
 }
 
-const test_digit = []u32.{
+const test_digit = []i32.{
     0x0030,
     0x0039,
     0x0661,
@@ -429,7 +429,7 @@ const test_digit = []u32.{
     0x1D7CE,
 };
 
-const test_letter = []u32.{
+const test_letter = []i32.{
     0x0041,
     0x0061,
     0x00AA,
@@ -479,7 +479,7 @@ test "isDigit" {
 }
 
 test "DigitOptimization" {
-    var i: u32 = 0;
+    var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isDigit(i);
         const want = letter.is(tables.Digit, i);

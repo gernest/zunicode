@@ -1,24 +1,24 @@
 const warn = @import("std").debug.warn;
 
-pub const rune_error: u32 = 0xfffd;
-pub const max_rune: u32 = 0x10ffff;
-pub const rune_self: u32 = 0x80;
+pub const rune_error: i32 = 0xfffd;
+pub const max_rune: i32 = 0x10ffff;
+pub const rune_self: i32 = 0x80;
 pub const utf_max: usize = 4;
 
 const surrogate_min: u32 = 0xD800;
 const surrogate_max: u32 = 0xDFFF;
 
-const t1: u32 = 0x00; // 0000 0000
-const tx: u32 = 0x80; // 1000 0000
-const t2: u32 = 0xC0; // 1100 0000
-const t3: u32 = 0xE0; // 1110 0000
-const t4: u32 = 0xF0; // 1111 0000
-const t5: u32 = 0xF8; // 1111 1000
+const t1: i32 = 0x00; // 0000 0000
+const tx: i32 = 0x80; // 1000 0000
+const t2: i32 = 0xC0; // 1100 0000
+const t3: i32 = 0xE0; // 1110 0000
+const t4: i32 = 0xF0; // 1111 0000
+const t5: i32 = 0xF8; // 1111 1000
 
-const maskx: u32 = 0x3F; // 0011 1111
-const mask2: u32 = 0x1F; // 0001 1111
-const mask3: u32 = 0x0F; // 0000 1111
-const mask4: u32 = 0x07; // 0000 0111
+const maskx: i32 = 0x3F; // 0011 1111
+const mask2: i32 = 0x1F; // 0001 1111
+const mask3: i32 = 0x0F; // 0000 1111
+const mask4: i32 = 0x07; // 0000 0111
 
 // TODO: investigate this because for some reason the expression produced wrong
 // values, I have hardcoded the values as a work around.
@@ -107,7 +107,7 @@ pub fn fullRune(p: []const u8) bool {
 }
 
 pub const Rune = struct.{
-    value: u32,
+    value: i32,
     size: usize,
 };
 
@@ -130,9 +130,9 @@ pub fn decodeRune(p: []const u8) !Rune {
         // The following code simulates an additional check for x == xx and
         // handling the ASCII and invalid cases accordingly. This mask-and-or
         // approach prevents an additional branch.
-        const mask = @intCast(u32, x) << 31 >> 31;
+        const mask = @intCast(i32, x) << 31 >> 31;
         return Rune.{
-            .value = @intCast(u32, p[0]) & ~mask | rune_error & mask,
+            .value = @intCast(i32, p[0]) & ~mask | rune_error & mask,
             .size = 1,
         };
     }
@@ -147,7 +147,7 @@ pub fn decodeRune(p: []const u8) !Rune {
     }
     if (sz == 2) {
         return Rune.{
-            .value = @intCast(u32, p0 & mask2) << 6 | @intCast(u32, b1 & maskx),
+            .value = @intCast(i32, p0 & @intCast(u8, mask2)) << 6 | @intCast(i32, b1 & @intCast(u8, maskx)),
             .size = 2,
         };
     }
@@ -157,7 +157,7 @@ pub fn decodeRune(p: []const u8) !Rune {
     }
     if (sz == 3) {
         return Rune.{
-            .value = @intCast(u32, p0 & mask3) << 12 | @intCast(u32, b1 & maskx) << 6 | @intCast(u32, b2 & maskx),
+            .value = @intCast(i32, p0 & @intCast(u8, mask3)) << 12 | @intCast(i32, b1 & @intCast(u8, maskx)) << 6 | @intCast(i32, b2 & @intCast(u8, maskx)),
             .size = 3,
         };
     }
@@ -166,7 +166,7 @@ pub fn decodeRune(p: []const u8) !Rune {
         return error.RuneError;
     }
     return Rune.{
-        .value = @intCast(u32, p0 & mask4) << 18 | @intCast(u32, b1 & maskx) << 12 | @intCast(u32, b2 & maskx) << 6 | @intCast(u32, b3 & maskx),
+        .value = @intCast(i32, p0 & @intCast(u8, mask4)) << 18 | @intCast(i32, b1 & @intCast(u8, maskx)) << 12 | @intCast(i32, b2 & @intCast(u8, maskx)) << 6 | @intCast(i32, b3 & @intCast(u8, maskx)),
         .size = 4,
     };
 }
@@ -237,24 +237,25 @@ pub fn decodeLastRune(p: []const u8) !Rune {
     return rune;
 }
 
-pub fn encodeRune(p: []u8, r: u32) !usize {
-    if (r <= rune1Max) {
+pub fn encodeRune(p: []u8, r: i32) !usize {
+    const i = @intCast(u32, r);
+    if (i <= rune1Max) {
         p[0] = @intCast(u8, r);
         return 1;
-    } else if (r <= rune2Max) {
+    } else if (i <= rune2Max) {
         _ = p[1];
         p[0] = @intCast(u8, t2 | (r >> 6));
         p[1] = @intCast(u8, tx | (r & maskx));
         return 2;
-    } else if (surrogate_min <= r and r <= surrogate_min) {
+    } else if (i > @intCast(u32, max_rune) or surrogate_min <= i and i <= surrogate_min) {
         return error.RuneError;
-    } else if (r <= rune3Max) {
+    } else if (i <= rune3Max) {
         _ = p[2];
         p[0] = @intCast(u8, t3 | (r >> 12));
         p[1] = @intCast(u8, tx | (r >> 6) & maskx);
         p[2] = @intCast(u8, tx | r & maskx);
         return 3;
-    } else if (r <= max_rune) {
+    } else {
         _ = p[3];
         p[0] = @intCast(u8, t4 | (r >> 18));
         p[1] = @intCast(u8, tx | (r >> 12) & maskx);

@@ -11,7 +11,7 @@ For working with `utf-8` values see `src/utf8/` , and for `utf-16` see `src/utf1
 
 
 ## `Rune`
-This is a concept borrowed from go. It is an alias for `u32` which is a
+This is a concept borrowed from go. It is an alias for `i32` which is a
 representation of a unicode code point.
 
 

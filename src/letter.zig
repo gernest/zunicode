@@ -31,7 +31,7 @@ pub fn is16(ranges: []const base.Range16, r: u16) bool {
 }
 
 pub fn is32(ranges: []base.Range32, r: u32) bool {
-    if (ranges.len <= base.linear_max or r <= base.max_latin1) {
+    if (ranges.len <= base.linear_max) {
         for (ranges) |*range| {
             if (r < range.lo) {
                 return false;
@@ -59,26 +59,24 @@ pub fn is32(ranges: []base.Range32, r: u32) bool {
     return false;
 }
 
-pub fn is(range_tab: *const base.RangeTable, r: u32) bool {
-    if (range_tab.r16.len > 0 and r <= range_tab.r16[range_tab.r16.len - 1].hi) {
-        var x = @intCast(u16, r);
-        return is16(range_tab.r16, x);
+pub fn is(range_tab: *const base.RangeTable, r: i32) bool {
+    if (range_tab.r16.len > 0 and r <= @intCast(i32, range_tab.r16[range_tab.r16.len - 1].hi)) {
+        return is16(range_tab.r16, @intCast(u16, r));
     }
-    if (range_tab.r32.len > 0 and r > range_tab.r32[0].lo) {
-        var x: u32 = r;
-        return is32(range_tab.r32, x);
+    if (range_tab.r32.len > 0 and r > @intCast(i32, range_tab.r32[0].lo)) {
+        return is32(range_tab.r32, @intCast(u32, r));
     }
     return false;
 }
 
-pub fn isExcludingLatin(range_tab: *const base.RangeTable, r: u32) bool {
+pub fn isExcludingLatin(range_tab: *const base.RangeTable, r: i32) bool {
     const off = range_tab.latin_offset;
     const r16_len = range_tab.r16.len;
-    if (r16_len > off and r <= @intCast(u32, range_tab.r16[r16_len - 1].hi)) {
+    if (r16_len > off and r <= @intCast(i32, range_tab.r16[r16_len - 1].hi)) {
         return is16(range_tab.r16[off..], @intCast(u16, r));
     }
-    if (range_tab.r32.len > 0 and r >= range_tab.r32[0].lo) {
-        return is32(range_tab.r32, r);
+    if (range_tab.r32.len > 0 and r >= @intCast(i32, range_tab.r32[0].lo)) {
+        return is32(range_tab.r32, @intCast(u32, r));
     }
     return false;
 }

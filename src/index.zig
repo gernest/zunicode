@@ -4,7 +4,7 @@ const tables = @import("tables.zig");
 const warn = @import("std").debug.warn;
 
 /// isUpper reports whether the rune is an upper case letter.
-pub fn isUpper(rune: u32) bool {
+pub fn isUpper(rune: i32) bool {
     if (rune <= base.max_latin1) {
         const p = tables.properties[@intCast(usize, rune)];
         return (p & base.pLmask) == base.pLu;
@@ -13,7 +13,7 @@ pub fn isUpper(rune: u32) bool {
 }
 
 // isLower reports whether the rune is a lower case letter.
-pub fn isLower(rune: u32) bool {
+pub fn isLower(rune: i32) bool {
     if (rune <= base.max_latin1) {
         const p = tables.properties[@intCast(usize, rune)];
         return (p & base.pLmask) == base.pLl;
@@ -30,11 +30,11 @@ pub fn isTitle(rune: u32) bool {
 }
 
 const toResult = struct.{
-    mapped: u32,
+    mapped: i32,
     found_mapping: bool,
 };
 
-fn to_case(_case: base.Case, rune: u32, case_range: []base.CaseRange) toResult {
+fn to_case(_case: base.Case, rune: i32, case_range: []base.CaseRange) toResult {
     if (_case.rune() < 0 or base.Case.Max.rune() <= _case.rune()) {
         return toResult.{
             .mapped = base.replacement_char,
@@ -46,8 +46,8 @@ fn to_case(_case: base.Case, rune: u32, case_range: []base.CaseRange) toResult {
     while (lo < hi) {
         const m = lo + (hi - lo) / 2;
         const cr = case_range[m];
-        if (cr.lo <= rune and rune <= cr.hi) {
-            const delta = cr.delta[_case.rune()];
+        if (@intCast(i32, cr.lo) <= rune and rune <= @intCast(i32, cr.hi)) {
+            const delta = cr.delta[@intCast(usize, _case.rune())];
             if (delta > @intCast(i32, base.max_rune)) {
                 // In an Upper-Lower sequence, which always starts with
                 // an UpperCase letter, the real deltas always look like:
@@ -59,18 +59,18 @@ fn to_case(_case: base.Case, rune: u32, case_range: []base.CaseRange) toResult {
                 // bit in the sequence offset.
                 // The constants UpperCase and TitleCase are even while LowerCase
                 // is odd so we take the low bit from _case.
-                var i: u32 = 1;
+                var i: i32 = 1;
                 return toResult.{
-                    .mapped = cr.lo + ((rune - cr.lo) & ~i | _case.rune() & 1),
+                    .mapped = @intCast(i32, cr.lo) + ((rune - @intCast(i32, cr.lo)) & ~i | _case.rune() & 1),
                     .found_mapping = true,
                 };
             }
             return toResult.{
-                .mapped = @intCast(u32, @intCast(i32, rune) + delta),
+                .mapped = @intCast(i32, @intCast(i32, rune) + delta),
                 .found_mapping = true,
             };
         }
-        if (rune < cr.lo) {
+        if (rune < @intCast(i32, cr.lo)) {
             hi = m;
         } else {
             lo = m + 1;
@@ -83,12 +83,12 @@ fn to_case(_case: base.Case, rune: u32, case_range: []base.CaseRange) toResult {
 }
 
 // to maps the rune to the specified case: UpperCase, LowerCase, or TitleCase.
-pub fn to(case: base.Case, rune: u32) u32 {
+pub fn to(case: base.Case, rune: i32) i32 {
     const v = to_case(case, rune, tables.CaseRanges);
     return v.mapped;
 }
 
-pub fn toUpper(rune: u32) u32 {
+pub fn toUpper(rune: i32) i32 {
     if (rune <= base.max_ascii) {
         if ('a' <= rune and rune <= 'z') {
             return rune - ('a' - 'A');
@@ -98,7 +98,7 @@ pub fn toUpper(rune: u32) u32 {
     return to(base.Case.Upper, rune);
 }
 
-pub fn toLower(rune: u32) u32 {
+pub fn toLower(rune: i32) i32 {
     if (rune <= base.max_ascii) {
         if ('A' <= rune and rune <= 'Z') {
             return rune + ('a' - 'A');
@@ -108,7 +108,7 @@ pub fn toLower(rune: u32) u32 {
     return to(base.Case.Lower, rune);
 }
 
-pub fn toTitle(rune: u32) u32 {
+pub fn toTitle(rune: i32) i32 {
     if (rune <= base.max_ascii) {
         if ('a' <= rune and rune <= 'z') {
             return rune - ('a' - 'A');
@@ -175,7 +175,7 @@ pub const print_ranges = []*const base.RangeTable.{
     tables.L, tables.M, tables.N, tables.P, tables.S,
 };
 
-pub fn in(r: u32, ranges: []const *const base.RangeTable) bool {
+pub fn in(r: i32, ranges: []const *const base.RangeTable) bool {
     for (ranges) |inside| {
         if (letter.is(inside, r)) {
             return true;
@@ -187,7 +187,7 @@ pub fn in(r: u32, ranges: []const *const base.RangeTable) bool {
 // IsGraphic reports whether the rune is defined as a Graphic by Unicode.
 // Such characters include letters, marks, numbers, punctuation, symbols, and
 // spaces, from categories L, M, N, P, S, Zs.
-pub fn isGraphic(r: u32) bool {
+pub fn isGraphic(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pg != 0;
     }
@@ -199,7 +199,7 @@ pub fn isGraphic(r: u32) bool {
 // ASCII space character, from categories L, M, N, P, S and the ASCII space
 // character. This categorization is the same as IsGraphic except that the
 // only spacing character is ASCII space, U+0020
-pub fn isPrint(r: u32) bool {
+pub fn isPrint(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pp != 0;
     }
@@ -213,7 +213,7 @@ pub fn isOneOf(ranges: []*base.RangeTable, r: u32) bool {
 // IsControl reports whether the rune is a control character.
 // The C (Other) Unicode category includes more code points
 // such as surrogates; use Is(C, r) to test for them.
-pub fn isControl(r: u32) bool {
+pub fn isControl(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pC != 0;
     }
@@ -221,7 +221,7 @@ pub fn isControl(r: u32) bool {
 }
 
 // IsLetter reports whether the rune is a letter (category L).
-pub fn isLetter(r: u32) bool {
+pub fn isLetter(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pLmask != 0;
     }
@@ -229,13 +229,13 @@ pub fn isLetter(r: u32) bool {
 }
 
 // IsMark reports whether the rune is a mark character (category M).
-pub fn isMark(r: u32) bool {
+pub fn isMark(r: i32) bool {
     // There are no mark characters in Latin-1.
     return letter.isExcludingLatin(tables.Mark, r);
 }
 
 // IsNumber reports whether the rune is a number (category N).
-pub fn isNumber(r: u32) bool {
+pub fn isNumber(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pN != 0;
     }
@@ -244,7 +244,7 @@ pub fn isNumber(r: u32) bool {
 
 // IsPunct reports whether the rune is a Unicode punctuation character
 // (category P).
-pub fn isPunct(r: u32) bool {
+pub fn isPunct(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pP != 0;
     }
@@ -257,7 +257,7 @@ pub fn isPunct(r: u32) bool {
 //  '\t', '\n', '\v', '\f', '\r', ' ', U+0085 (NEL), U+00A0 (NBSP).
 // Other definitions of spacing characters are set by category
 // Z and property Pattern_White_Space.
-pub fn isSpace(r: u32) bool {
+pub fn isSpace(r: i32) bool {
     if (r <= base.max_latin1) {
         switch (r) {
             '\t', '\n', 0x0B, 0x0C, '\r', ' ', 0x85, 0xA0 => return true,
@@ -268,7 +268,7 @@ pub fn isSpace(r: u32) bool {
 }
 
 // IsSymbol reports whether the rune is a symbolic character.
-pub fn isSymbol(r: u32) bool {
+pub fn isSymbol(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pS != 0;
     }
@@ -276,7 +276,7 @@ pub fn isSymbol(r: u32) bool {
 }
 
 // isDigit reports whether the rune is a decimal digit.
-pub fn isDigit(r: u32) bool {
+pub fn isDigit(r: i32) bool {
     if (r <= base.max_latin1) {
         return '0' <= r and r <= '9';
     }

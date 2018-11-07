@@ -1,7 +1,7 @@
-pub const max_rune: u32 = 0x10ffff;
-pub const replacement_char: u32 = 0xfffd;
-pub const max_ascii: u32 = 0x7f;
-pub const max_latin1: u32 = 0xff;
+pub const max_rune: i32 = 0x10ffff;
+pub const replacement_char: i32 = 0xfffd;
+pub const max_ascii: i32 = 0x7f;
+pub const max_latin1: i32 = 0xff;
 
 pub const pC: u8 = 1;
 pub const pP: u8 = 2;
@@ -52,8 +52,8 @@ pub const Case = enum(usize).{
     Title,
     Max,
 
-    pub fn rune(self: Case) u32 {
-        return @intCast(u32, @enumToInt(self));
+    pub fn rune(self: Case) i32 {
+        return @intCast(i32, @enumToInt(self));
     }
 };
 

@@ -13,10 +13,10 @@ test "init" {
 }
 
 const Utf8Map = struct.{
-    r: u32,
+    r: i32,
     str: []const u8,
 
-    fn init(r: u32, str: []const u8) Utf8Map {
+    fn init(r: i32, str: []const u8) Utf8Map {
         return Utf8Map.{ .r = r, .str = str };
     }
 };
