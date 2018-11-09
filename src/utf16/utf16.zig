@@ -1,3 +1,6 @@
+const std = @import("std");
+const mem = std.mem;
+
 pub const replacement_rune: i32 = 0xfffd;
 pub const max_rune: i32 = 0x10ffff;
 
@@ -39,4 +42,32 @@ pub fn encodeRune(r: i32) Pair {
     }
     const rn = r - surrSelf;
     return Pair.{ .r1 = surr1 + (rn >> 10) & 0x3ff, .r2 = surr2 + rn & 0x3ff };
+}
+
+// encode returns the UTF-16 encoding of the Unicode code point sequence s. It
+// is up to the caller to free the returned slice from the allocator a when done.
+pub fn encode(a: *mem.Allocator, s: []i32) []u16 {
+    var n: usize = s.len;
+    for (s) |v| {
+        if (v >= surrSelf) {
+            n += 1;
+        }
+    }
+    var a = try a.alloc(u16, n);
+    n = 0;
+    for (s) |v| {
+        if (0 <= v and v < surr1 or surr3 <= v and v < surrSelf) {
+            a[n] = @intCast(u16, v);
+            n += 1;
+        } else if (surrSelf <= v and v <= max_rune) {
+            const r = encodeRune(v);
+            a[n] = @intCast(u16, r.r1);
+            a[n + 1] = @intCast(u16, r.r2);
+            n += 2;
+        } else {
+            a[n] = @intCast(u16, replacement_rune);
+            n += 1;
+        }
+    }
+    return a[0..n];
 }
