@@ -30,12 +30,10 @@ const encode_tests = []encodeTest.{
 test "encode" {
     var a = std.debug.global_allocator;
     for (encode_tests) |ts, i| {
-        if (utf16.encode(a, ts.in)) |v| {
-            const value = v;
-            if (!mem.eql(u16, ts.out, value)) {
-                try t.terrorf("mismatch encoding at {}\n", i);
-            }
-            a.free(v);
-        } else |err| {}
+        const value = try utf16.encode(a, ts.in);
+        if (!mem.eql(u16, ts.out, value)) {
+            try t.terrorf("mismatch encoding at {}\n", i);
+        }
+        a.free(value);
     }
 }
