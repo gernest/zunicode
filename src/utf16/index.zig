@@ -41,7 +41,7 @@ pub fn encodeRune(r: i32) Pair {
         return Pair.{ .r1 = replacement_rune, .r2 = replacement_rune };
     }
     const rn = r - surrSelf;
-    return Pair.{ .r1 = surr1 + (rn >> 10) & 0x3ff, .r2 = surr2 + rn & 0x3ff };
+    return Pair.{ .r1 = surr1 + ((rn >> 10) & 0x3ff), .r2 = surr2 + (rn & 0x3ff) };
 }
 
 // encode returns the UTF-16 encoding of the Unicode code point sequence s. It
@@ -55,12 +55,15 @@ pub fn encode(allocator: *mem.Allocator, s: []const i32) ![]u16 {
     }
     var a = try allocator.alloc(u16, n);
     n = 0;
-    for (s) |v| {
+    for (s) |v, id| {
         if (0 <= v and v < surr1 or surr3 <= v and v < surrSelf) {
+            // warn("branch 1 id={}\n", id);
             a[n] = @intCast(u16, v);
             n += 1;
         } else if (surrSelf <= v and v <= max_rune) {
+            // warn("branch 2 id={}\n", id);
             const r = encodeRune(v);
+            // warn("{x} {x} \n", r.r1, r.r2);
             a[n] = @intCast(u16, r.r1);
             a[n + 1] = @intCast(u16, r.r2);
             n += 2;
