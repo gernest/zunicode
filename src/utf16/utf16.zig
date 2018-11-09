@@ -71,3 +71,26 @@ pub fn encode(a: *mem.Allocator, s: []i32) []u16 {
     }
     return a[0..n];
 }
+
+// decode returns the Unicode code point sequence represented
+// by the UTF-16 encoding s.
+pub fn decode(a: *mem.Allocator, s: []u16) []i32 {
+    var a = try a.alloc(i32, s.len);
+    var n = 0;
+    var i: usize = 0;
+    while (i < s.len) : (i += 1) {
+        const r = @intCast(i32, s[i]);
+        if (r < surr1 or surr3 <= r) {
+            //normal rune
+            a[n] = r;
+        } else if (surr1 <= r and r < surr2 and i + 1 < len(s) and surr2 <= s[i + 1] and s[i + 1] < surr3) {
+            // valid surrogate sequence
+            a[n] = decodeRune(r, @intCast(i32, s[i + 1]));
+            i += 1;
+        } else {
+            a[n] = replacement_rune;
+        }
+        n += 1;
+    }
+    return a[0..n];
+}
