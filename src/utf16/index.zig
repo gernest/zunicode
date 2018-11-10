@@ -24,6 +24,8 @@ pub fn issSurrogate(r: i32) bool {
 // packages avoid ussing raw []u16 to simplify manamemeng and freeing of memory.
 pub const ArrayUTF16 = ArrayList(u16);
 
+pub const ArrayUTF8 = ArrayList(i32);
+
 // decodeRune returns the UTF-16 decoding of a surrogate pair.
 // If the pair is not a valid UTF-16 surrogate pair, DecodeRune returns
 // the Unicode replacement code point U+FFFD.
@@ -64,13 +66,10 @@ pub fn encode(allocator: *mem.Allocator, s: []const i32) !ArrayUTF16 {
     n = 0;
     for (s) |v, id| {
         if (0 <= v and v < surr1 or surr3 <= v and v < surrSelf) {
-            // warn("{} {} {}\n ", list.capacity(), list.count(), n);
             list.set(n, @intCast(u16, v));
             n += 1;
         } else if (surrSelf <= v and v <= max_rune) {
-            // warn("branch 2 id={}\n", id);
             const r = encodeRune(v);
-            // warn("{x} {x} \n", r.r1, r.r2);
             list.set(n, @intCast(u16, r.r1));
             list.set(n + 1, @intCast(u16, r.r2));
             n += 2;
@@ -85,8 +84,9 @@ pub fn encode(allocator: *mem.Allocator, s: []const i32) !ArrayUTF16 {
 
 // decode returns the Unicode code point sequence represented
 // by the UTF-16 encoding s.
-pub fn decode(a: *mem.Allocator, s: []u16) []i32 {
-    var a = try a.alloc(i32, s.len);
+pub fn decode(a: *mem.Allocator, s: []u16) !ArrayUTF8 {
+    var list = ArrayUTF8.init(a);
+    try list.resize(s.len);
     var n = 0;
     var i: usize = 0;
     while (i < s.len) : (i += 1) {
@@ -94,14 +94,16 @@ pub fn decode(a: *mem.Allocator, s: []u16) []i32 {
         if (r < surr1 or surr3 <= r) {
             //normal rune
             a[n] = r;
+            list.set(n, r);
         } else if (surr1 <= r and r < surr2 and i + 1 < len(s) and surr2 <= s[i + 1] and s[i + 1] < surr3) {
             // valid surrogate sequence
-            a[n] = decodeRune(r, @intCast(i32, s[i + 1]));
+            list.set(n, decodeRune(r, @intCast(i32, s[i + 1])));
             i += 1;
         } else {
-            a[n] = replacement_rune;
+            list.set(n, replacement_rune);
         }
         n += 1;
     }
-    return a[0..n];
+    list.shrink(n);
+    return list;
 }
