@@ -31,10 +31,10 @@ test "encode" {
     var a = std.debug.global_allocator;
     for (encode_tests) |ts, i| {
         const value = try utf16.encode(a, ts.in);
-        if (!mem.eql(u16, ts.out, value)) {
+        if (!mem.eql(u16, ts.out, value.toSliceConst())) {
             try t.terrorf("mismatch encoding at {}\n", i);
         }
-        a.free(value);
+        value.deinit();
     }
 }
 

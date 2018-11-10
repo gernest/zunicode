@@ -1,5 +1,7 @@
 const std = @import("std");
 const mem = std.mem;
+const ArrayList = std.ArrayList;
+const warn = std.debug.warn;
 
 pub const replacement_rune: i32 = 0xfffd;
 pub const max_rune: i32 = 0x10ffff;
@@ -17,6 +19,10 @@ const surrSelf: i32 = 0x10000;
 pub fn issSurrogate(r: i32) bool {
     return surr1 <= r and r < surr3;
 }
+
+// ArrayUTF16 this holds an array/slice of utf16 code points. The API of this
+// packages avoid ussing raw []u16 to simplify manamemeng and freeing of memory.
+pub const ArrayUTF16 = ArrayList(u16);
 
 // decodeRune returns the UTF-16 decoding of a surrogate pair.
 // If the pair is not a valid UTF-16 surrogate pair, DecodeRune returns
@@ -46,33 +52,35 @@ pub fn encodeRune(r: i32) Pair {
 
 // encode returns the UTF-16 encoding of the Unicode code point sequence s. It
 // is up to the caller to free the returned slice from the allocator a when done.
-pub fn encode(allocator: *mem.Allocator, s: []const i32) ![]u16 {
+pub fn encode(allocator: *mem.Allocator, s: []const i32) !ArrayUTF16 {
     var n: usize = s.len;
     for (s) |v| {
         if (v >= surrSelf) {
             n += 1;
         }
     }
-    var a = try allocator.alloc(u16, n);
+    var list = ArrayUTF16.init(allocator);
+    try list.resize(n);
     n = 0;
     for (s) |v, id| {
         if (0 <= v and v < surr1 or surr3 <= v and v < surrSelf) {
-            // warn("branch 1 id={}\n", id);
-            a[n] = @intCast(u16, v);
+            // warn("{} {} {}\n ", list.capacity(), list.count(), n);
+            list.set(n, @intCast(u16, v));
             n += 1;
         } else if (surrSelf <= v and v <= max_rune) {
             // warn("branch 2 id={}\n", id);
             const r = encodeRune(v);
             // warn("{x} {x} \n", r.r1, r.r2);
-            a[n] = @intCast(u16, r.r1);
-            a[n + 1] = @intCast(u16, r.r2);
+            list.set(n, @intCast(u16, r.r1));
+            list.set(n + 1, @intCast(u16, r.r2));
             n += 2;
         } else {
-            a[n] = @intCast(u16, replacement_rune);
+            list.set(n, @intCast(u16, replacement_rune));
             n += 1;
         }
     }
-    return a[0..n];
+    list.shrink(n);
+    return list;
 }
 
 // decode returns the Unicode code point sequence represented
