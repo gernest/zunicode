@@ -93,7 +93,6 @@ pub fn decode(a: *mem.Allocator, s: []u16) !ArrayUTF8 {
         const r = @intCast(i32, s[i]);
         if (r < surr1 or surr3 <= r) {
             //normal rune
-            a[n] = r;
             list.set(n, r);
         } else if (surr1 <= r and r < surr2 and i + 1 < len(s) and surr2 <= s[i + 1] and s[i + 1] < surr3) {
             // valid surrogate sequence
