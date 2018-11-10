@@ -2,6 +2,7 @@ language: minimal
 install:
   - wget https://ziglang.org/builds/zig-linux-x86_64-0.3.0+ef5d7ce4.tar.xz
   - tar xf zig-linux-x86_64-0.3.0+ef5d7ce4.tar.xz
-  - ls -l
+  - mv zig-linux-x86_64-0.3.0+ef5d7ce4 zig
+  - ls -l zig
 script:
   - make
