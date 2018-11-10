@@ -1,5 +1,7 @@
 # zunicode
 
+[![Build Status](https://travis-ci.org/gernest/zunicode.svg?branch=master)](https://travis-ci.org/gernest/zunicode)
+
 This package provided functions for working with unicode code points. It is the
 goal of the package to be low level, offering primitives for working with
 unicode in the `ziglang`.
