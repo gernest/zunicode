@@ -23,7 +23,7 @@ pub fn issSurrogate(r: i32) bool {
 // the Unicode replacement code point U+FFFD.
 pub fn decodeRune(r1: i32, r2: i32) i32 {
     if (surr1 <= r1 and r1 < surr2 and surr2 <= r2 and r2 < surr3) {
-        return (r1 - surr1) << 10 | (r2 - surr2) + surrSelf;
+        return (((r1 - surr1) << 10) | (r2 - surr2)) + surrSelf;
     }
     return replacement_rune;
 }
