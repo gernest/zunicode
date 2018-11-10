@@ -1,2 +1,2 @@
 test:
-	zig help
+	./bin/zig help
