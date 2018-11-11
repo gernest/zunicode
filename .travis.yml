@@ -4,4 +4,6 @@ install:
   - tar xf zig-linux-x86_64-0.3.0+ef5d7ce4.tar.xz
   - mv zig-linux-x86_64-0.3.0+ef5d7ce4 bin
 script:
-  - make
+  - ./bin/zig test src/utf16/index_test.zig
+  - ./bin/zig test src/utf8/index_test.zig
+  - ./bin/zig test src/index_test.zig
