@@ -6,6 +6,6 @@ pub fn terror(comptime fmt: []const u8) !void {
 }
 
 pub fn terrorf(comptime fmt: []const u8, args: ...) !void {
-    debug.warn(fmt, args);
+    debug.warn(fmt ++ "\n", args);
     return error.TestFailed;
 }
