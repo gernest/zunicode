@@ -1,4 +1,5 @@
 const warn = @import("std").debug.warn;
+const assert = @import("std").debug.assert;
 
 pub const rune_error: i32 = 0xfffd;
 pub const max_rune: i32 = 0x10ffff;
@@ -275,6 +276,12 @@ pub const Iterator = struct.{
             .src = src,
             .pos = 0,
         };
+    }
+
+    // resets the cursor position to index
+    pub fn reset(self: *Iterator, index: usize) void {
+        assert(index < self.src.len);
+        self.pos = index;
     }
 
     pub fn next(self: *Iterator) !?Rune {

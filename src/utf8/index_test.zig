@@ -121,3 +121,48 @@ test "surrogateRune" {
         }
     }
 }
+
+test "Iterator" {
+    const source = "a,b,c";
+    var iter = utf8.Iterator.init(source);
+    var a = try iter.next();
+    if (a == null) {
+        try t.terror("expected a valid rune");
+    }
+    if (a.?.value != 'a') {
+        const sa = []const u8.{@intCast(u8, a.?.value)};
+        try t.terrorf("expected a got {}\n", sa);
+    }
+    _ = try iter.next();
+
+    a = try iter.next();
+    if (a == null) {
+        try t.terror("expected a valid rune");
+    }
+    if (a.?.value != 'b') {
+        const sa = []const u8.{@intCast(u8, a.?.value)};
+        try t.terrorf("expected , got {}\n", sa);
+    }
+    _ = try iter.next();
+    _ = try iter.next();
+    a = try iter.next();
+    if (a != null) {
+        try t.terror("expected null");
+    }
+
+    iter.reset(0);
+    a = try iter.peek();
+    if (a == null) {
+        try t.terror("expected not null");
+    }
+
+    const b = try iter.next();
+    if (b == null) {
+        try t.terror("expected not null");
+    }
+    if (a.?.value != b.?.value) {
+        const sa = []const u8.{@intCast(u8, a.?.value)};
+        const sb = []const u8.{@intCast(u8, b.?.value)};
+        try t.terrorf("expected {} to equal {}", sa, sb);
+    }
+}
