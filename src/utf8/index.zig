@@ -285,6 +285,27 @@ pub const Iterator = struct.{
         self.pos += rune.size;
         return rune;
     }
+
+    // this is an alias for peek_nth(1)
+    pub fn peek(self: *Iterator) !?Rune {
+        return self.peek_nth(1);
+    }
+
+    // peek_nth reads nth rune without advancing the cursor.
+    pub fn peek_nth(self: *Iterator, n: usize) !?Rune {
+        var pos = self.pos;
+        var i: usize = 0;
+        var last_read: ?Rune = undefined;
+        while (i < n) : (i += 1) {
+            if (pos >= self.src.len) {
+                return null;
+            }
+            const rune = try decodeRune(self.src[pos..]);
+            pos += rune.size;
+            last_read = rune;
+        }
+        return last_read;
+    }
 };
 
 // runeCount returns the number of runes in p. Erroneous and short
