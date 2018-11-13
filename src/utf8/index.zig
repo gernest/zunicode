@@ -71,7 +71,7 @@ const first = []u8{
     s5, s6, s6, s6, s7, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, // 0xF0-0xFF
 };
 
-const acceptRange = struct{
+const acceptRange = struct {
     lo: u8,
     hi: u8,
 
@@ -107,7 +107,7 @@ pub fn fullRune(p: []const u8) bool {
     return false;
 }
 
-pub const Rune = struct{
+pub const Rune = struct {
     value: i32,
     size: usize,
 };
@@ -267,7 +267,7 @@ pub fn encodeRune(p: []u8, r: i32) !usize {
     return error.RuneError;
 }
 
-pub const Iterator = struct{
+pub const Iterator = struct {
     src: []const u8,
     pos: usize,
 

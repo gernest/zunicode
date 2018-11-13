@@ -10,7 +10,7 @@ test "constants" {
     }
 }
 
-const encodeTest = struct{
+const encodeTest = struct {
     in: []const i32,
     out: []const u16,
 };

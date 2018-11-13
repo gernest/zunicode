@@ -36,7 +36,7 @@ pub fn decodeRune(r1: i32, r2: i32) i32 {
     return replacement_rune;
 }
 
-pub const Pair = struct{
+pub const Pair = struct {
     r1: i32,
     r2: i32,
 };

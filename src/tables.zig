@@ -15,7 +15,7 @@ const CaseRange = base.CaseRange;
 pub const Version = "10.0.0";
 
 // Categories is the set of Unicode category tables.
-pub const Category = enum{
+pub const Category = enum {
     C,
     Cc,
     Cf,
@@ -3637,7 +3637,7 @@ pub const Zs = &_Zs; // Zs is the set of Unicode characters in category Zs.
 //DO NOT EDIT
 
 // Scripts is the set of Unicode script tables.
-pub const Script = enum{
+pub const Script = enum {
     Adlam,
     Ahom,
     Anatolian_Hieroglyphs,
@@ -6193,7 +6193,7 @@ pub const Zanabazar_Square = &_Zanabazar_Square; // Zanabazar_Square is the set 
 //DO NOT EDIT
 
 // Properties is the set of Unicode property tables.
-pub const Property = enum{
+pub const Property = enum {
     ASCII_Hex_Digit,
     Bidi_Control,
     Dash,
@@ -8445,7 +8445,7 @@ pub const caseOrbit = []base.FoldPair{
 // code points outside the category that are equivalent under
 // simple case folding to code points inside the category.
 // If there is no entry for a category name, there are no such points.
-pub const FoldCategory = enum{
+pub const FoldCategory = enum {
     L,
     Ll,
     Lt,
@@ -8762,7 +8762,7 @@ const foldMn = RangeTable{
 // code points outside the script that are equivalent under
 // simple case folding to code points inside the script.
 // If there is no entry for a script name, there are no such points.
-pub const FoldScript = enum{
+pub const FoldScript = enum {
     Common,
     Greek,
     Inherited,

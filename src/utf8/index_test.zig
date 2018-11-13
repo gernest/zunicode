@@ -12,7 +12,7 @@ test "init" {
     }
 }
 
-const Utf8Map = struct{
+const Utf8Map = struct {
     r: i32,
     str: []const u8,
 

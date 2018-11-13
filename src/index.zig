@@ -29,7 +29,7 @@ pub fn isTitle(rune: u32) bool {
     return letter.isExcludingLatin(tables.Title, rune);
 }
 
-const toResult = struct{
+const toResult = struct {
     mapped: i32,
     found_mapping: bool,
 };

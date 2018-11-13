@@ -20,13 +20,13 @@ pub const pLmask: u8 = 96;
 /// Upper Lower Upper Lower.
 pub const upper_lower: i32 = @intCast(i32, max_rune) + 1;
 
-pub const RangeTable = struct{
+pub const RangeTable = struct {
     r16: []Range16,
     r32: []Range32,
     latin_offset: usize,
 };
 
-pub const Range16 = struct{
+pub const Range16 = struct {
     lo: u16,
     hi: u16,
     stride: u16,
@@ -36,7 +36,7 @@ pub const Range16 = struct{
     }
 };
 
-pub const Range32 = struct{
+pub const Range32 = struct {
     lo: u32,
     hi: u32,
     stride: u32,
@@ -46,7 +46,7 @@ pub const Range32 = struct{
     }
 };
 
-pub const Case = enum(usize){
+pub const Case = enum(usize) {
     Upper,
     Lower,
     Title,
@@ -57,7 +57,7 @@ pub const Case = enum(usize){
     }
 };
 
-pub const CaseRange = struct{
+pub const CaseRange = struct {
     lo: u32,
     hi: u32,
     delta: []const i32,
@@ -69,7 +69,7 @@ pub const CaseRange = struct{
 
 pub const linear_max: usize = 18;
 
-pub const FoldPair = struct{
+pub const FoldPair = struct {
     from: u16,
     to: u16,
 

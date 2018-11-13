@@ -71,7 +71,7 @@ test "isUpper" {
     }
 }
 
-const caseT = struct{
+const caseT = struct {
     case: base.Case,
     in: i32,
     out: i32,
