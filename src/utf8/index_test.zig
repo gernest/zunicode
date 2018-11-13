@@ -12,16 +12,16 @@ test "init" {
     }
 }
 
-const Utf8Map = struct.{
+const Utf8Map = struct{
     r: i32,
     str: []const u8,
 
     fn init(r: i32, str: []const u8) Utf8Map {
-        return Utf8Map.{ .r = r, .str = str };
+        return Utf8Map{ .r = r, .str = str };
     }
 };
 
-const utf8_map = []Utf8Map.{
+const utf8_map = []Utf8Map{
     Utf8Map.init(0x0000, "\x00"),
     Utf8Map.init(0x0001, "\x01"),
     Utf8Map.init(0x007e, "\x7e"),
@@ -56,12 +56,12 @@ const utf8_map = []Utf8Map.{
     Utf8Map.init(0xFFFD, "\xef\xbf\xbd"),
 };
 
-const surrogete_map = []Utf8Map.{
+const surrogete_map = []Utf8Map{
     Utf8Map.init(0xd800, "\xed\xa0\x80"),
     Utf8Map.init(0xdfff, "\xed\xbf\xbf"),
 };
 
-const test_strings = [][]const u8.{
+const test_strings = [][]const u8{
     "",
     "abcd",
     "☺☻☹",
@@ -76,7 +76,7 @@ test "fullRune" {
             try t.terrorf("expected {} to be full rune\n", m.str);
         }
     }
-    const sample = [][]const u8.{ "\xc0", "\xc1" };
+    const sample = [][]const u8{ "\xc0", "\xc1" };
     for (sample) |m| {
         if (!utf8.fullRune(m)) {
             try t.terrorf("expected {} to be full rune\n", m);
@@ -86,7 +86,7 @@ test "fullRune" {
 
 test "encodeRune" {
     for (utf8_map) |m, idx| {
-        var buf = []u8.{0} ** 10;
+        var buf = []u8{0} ** 10;
         const n = try utf8.encodeRune(buf[0..], m.r);
         const ok = std.mem.eql(u8, buf[0..n], m.str);
         if (!ok) {
@@ -130,7 +130,7 @@ test "Iterator" {
         try t.terror("expected a valid rune");
     }
     if (a.?.value != 'a') {
-        const sa = []const u8.{@intCast(u8, a.?.value)};
+        const sa = []const u8{@intCast(u8, a.?.value)};
         try t.terrorf("expected a got {}\n", sa);
     }
     _ = try iter.next();
@@ -140,7 +140,7 @@ test "Iterator" {
         try t.terror("expected a valid rune");
     }
     if (a.?.value != 'b') {
-        const sa = []const u8.{@intCast(u8, a.?.value)};
+        const sa = []const u8{@intCast(u8, a.?.value)};
         try t.terrorf("expected , got {}\n", sa);
     }
     _ = try iter.next();
@@ -161,8 +161,8 @@ test "Iterator" {
         try t.terror("expected not null");
     }
     if (a.?.value != b.?.value) {
-        const sa = []const u8.{@intCast(u8, a.?.value)};
-        const sb = []const u8.{@intCast(u8, b.?.value)};
+        const sa = []const u8{@intCast(u8, a.?.value)};
+        const sb = []const u8{@intCast(u8, b.?.value)};
         try t.terrorf("expected {} to equal {}", sa, sb);
     }
 }

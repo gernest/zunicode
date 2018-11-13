@@ -10,20 +10,20 @@ test "constants" {
     }
 }
 
-const encodeTest = struct.{
+const encodeTest = struct{
     in: []const i32,
     out: []const u16,
 };
 
-const encode_tests = []encodeTest.{
-    encodeTest.{ .in = []i32.{ 1, 2, 3, 4 }, .out = []u16.{ 1, 2, 3, 4 } },
-    encodeTest.{
-        .in = []i32.{ 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff },
-        .out = []u16.{ 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff },
+const encode_tests = []encodeTest{
+    encodeTest{ .in = []i32{ 1, 2, 3, 4 }, .out = []u16{ 1, 2, 3, 4 } },
+    encodeTest{
+        .in = []i32{ 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff },
+        .out = []u16{ 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff },
     },
-    encodeTest.{
-        .in = []i32.{ 'a', 'b', 0xd7ff, 0xd800, 0xdfff, 0xe000, 0x110000, -1 },
-        .out = []u16.{ 'a', 'b', 0xd7ff, 0xfffd, 0xfffd, 0xe000, 0xfffd, 0xfffd },
+    encodeTest{
+        .in = []i32{ 'a', 'b', 0xd7ff, 0xd800, 0xdfff, 0xe000, 0x110000, -1 },
+        .out = []u16{ 'a', 'b', 0xd7ff, 0xfffd, 0xfffd, 0xe000, 0xfffd, 0xfffd },
     },
 };
 

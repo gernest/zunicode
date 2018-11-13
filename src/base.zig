@@ -20,33 +20,33 @@ pub const pLmask: u8 = 96;
 /// Upper Lower Upper Lower.
 pub const upper_lower: i32 = @intCast(i32, max_rune) + 1;
 
-pub const RangeTable = struct.{
+pub const RangeTable = struct{
     r16: []Range16,
     r32: []Range32,
     latin_offset: usize,
 };
 
-pub const Range16 = struct.{
+pub const Range16 = struct{
     lo: u16,
     hi: u16,
     stride: u16,
 
     pub fn init(lo: u16, hi: u16, stride: u16) Range16 {
-        return Range16.{ .lo = lo, .hi = hi, .stride = stride };
+        return Range16{ .lo = lo, .hi = hi, .stride = stride };
     }
 };
 
-pub const Range32 = struct.{
+pub const Range32 = struct{
     lo: u32,
     hi: u32,
     stride: u32,
 
     pub fn init(lo: u32, hi: u32, stride: u32) Range32 {
-        return Range32.{ .lo = lo, .hi = hi, .stride = stride };
+        return Range32{ .lo = lo, .hi = hi, .stride = stride };
     }
 };
 
-pub const Case = enum(usize).{
+pub const Case = enum(usize){
     Upper,
     Lower,
     Title,
@@ -57,23 +57,23 @@ pub const Case = enum(usize).{
     }
 };
 
-pub const CaseRange = struct.{
+pub const CaseRange = struct{
     lo: u32,
     hi: u32,
     delta: []const i32,
 
     pub fn init(lo: u32, hi: u32, delta: []const i32) CaseRange {
-        return CaseRange.{ .lo = lo, .hi = hi, .delta = delta };
+        return CaseRange{ .lo = lo, .hi = hi, .delta = delta };
     }
 };
 
 pub const linear_max: usize = 18;
 
-pub const FoldPair = struct.{
+pub const FoldPair = struct{
     from: u16,
     to: u16,
 
     pub fn init(from: u16, to: u16) FoldPair {
-        return FoldPair.{ .from = from, .to = to };
+        return FoldPair{ .from = from, .to = to };
     }
 };

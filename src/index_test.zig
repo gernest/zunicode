@@ -5,7 +5,7 @@ const unicode = @import("index.zig");
 const t = @import("./util/index.zig");
 const warn = @import("std").debug.warn;
 
-const notletterTest = []i32.{
+const notletterTest = []i32{
     0x20,
     0x35,
     0x375,
@@ -16,7 +16,7 @@ const notletterTest = []i32.{
     0x1ffff,
     0x10ffff,
 };
-const upper_test = []i32.{
+const upper_test = []i32{
     0x41,
     0xc0,
     0xd8,
@@ -40,7 +40,7 @@ const upper_test = []i32.{
     0x1d400,
     0x1d7ca,
 };
-const notupperTest = []i32.{
+const notupperTest = []i32{
     0x40,
     0x5b,
     0x61,
@@ -71,16 +71,16 @@ test "isUpper" {
     }
 }
 
-const caseT = struct.{
+const caseT = struct{
     case: base.Case,
     in: i32,
     out: i32,
     fn init(case: base.Case, in: i32, out: i32) caseT {
-        return caseT.{ .case = case, .in = in, .out = out };
+        return caseT{ .case = case, .in = in, .out = out };
     }
 };
 
-const case_test = []caseT.{
+const case_test = []caseT{
 
     // ASCII (special-cased so test carefully)
     caseT.init(base.Case.Upper, '\n', '\n'),
@@ -370,7 +370,7 @@ test "isSymbolLatin1" {
     }
 }
 
-const test_digit = []i32.{
+const test_digit = []i32{
     0x0030,
     0x0039,
     0x0661,
@@ -429,7 +429,7 @@ const test_digit = []i32.{
     0x1D7CE,
 };
 
-const test_letter = []i32.{
+const test_letter = []i32{
     0x0041,
     0x0061,
     0x00AA,

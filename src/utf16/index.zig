@@ -36,7 +36,7 @@ pub fn decodeRune(r1: i32, r2: i32) i32 {
     return replacement_rune;
 }
 
-pub const Pair = struct.{
+pub const Pair = struct{
     r1: i32,
     r2: i32,
 };
@@ -46,10 +46,10 @@ pub const Pair = struct.{
 // EncodeRune returns U+FFFD, U+FFFD.
 pub fn encodeRune(r: i32) Pair {
     if (r < surrSelf or r > max_rune) {
-        return Pair.{ .r1 = replacement_rune, .r2 = replacement_rune };
+        return Pair{ .r1 = replacement_rune, .r2 = replacement_rune };
     }
     const rn = r - surrSelf;
-    return Pair.{ .r1 = surr1 + ((rn >> 10) & 0x3ff), .r2 = surr2 + (rn & 0x3ff) };
+    return Pair{ .r1 = surr1 + ((rn >> 10) & 0x3ff), .r2 = surr2 + (rn & 0x3ff) };
 }
 
 // encode returns the UTF-16 encoding of the Unicode code point sequence s. It

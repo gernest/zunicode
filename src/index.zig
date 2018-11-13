@@ -29,14 +29,14 @@ pub fn isTitle(rune: u32) bool {
     return letter.isExcludingLatin(tables.Title, rune);
 }
 
-const toResult = struct.{
+const toResult = struct{
     mapped: i32,
     found_mapping: bool,
 };
 
 fn to_case(_case: base.Case, rune: i32, case_range: []base.CaseRange) toResult {
     if (_case.rune() < 0 or base.Case.Max.rune() <= _case.rune()) {
-        return toResult.{
+        return toResult{
             .mapped = base.replacement_char,
             .found_mapping = false,
         };
@@ -60,12 +60,12 @@ fn to_case(_case: base.Case, rune: i32, case_range: []base.CaseRange) toResult {
                 // The constants UpperCase and TitleCase are even while LowerCase
                 // is odd so we take the low bit from _case.
                 var i: i32 = 1;
-                return toResult.{
+                return toResult{
                     .mapped = @intCast(i32, cr.lo) + ((rune - @intCast(i32, cr.lo)) & ~i | _case.rune() & 1),
                     .found_mapping = true,
                 };
             }
-            return toResult.{
+            return toResult{
                 .mapped = @intCast(i32, @intCast(i32, rune) + delta),
                 .found_mapping = true,
             };
@@ -76,7 +76,7 @@ fn to_case(_case: base.Case, rune: i32, case_range: []base.CaseRange) toResult {
             lo = m + 1;
         }
     }
-    return toResult.{
+    return toResult{
         .mapped = rune,
         .found_mapping = false,
     };
@@ -167,11 +167,11 @@ pub fn simpleFold(r: u32) u32 {
     return toUpper(r);
 }
 
-pub const graphic_ranges = []*const base.RangeTable.{
+pub const graphic_ranges = []*const base.RangeTable{
     tables.L, tables.M, tables.N, tables.P, tables.S, tables.Zs,
 };
 
-pub const print_ranges = []*const base.RangeTable.{
+pub const print_ranges = []*const base.RangeTable{
     tables.L, tables.M, tables.N, tables.P, tables.S,
 };
 
