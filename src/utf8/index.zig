@@ -253,15 +253,15 @@ pub fn encodeRune(p: []u8, r: i32) !usize {
     } else if (i <= rune3Max) {
         _ = p[2];
         p[0] = @intCast(u8, t3 | (r >> 12));
-        p[1] = @intCast(u8, tx | (r >> 6) & maskx);
-        p[2] = @intCast(u8, tx | r & maskx);
+        p[1] = @intCast(u8, tx | ((r >> 6) & maskx));
+        p[2] = @intCast(u8, tx | (r & maskx));
         return 3;
     } else {
         _ = p[3];
         p[0] = @intCast(u8, t4 | (r >> 18));
-        p[1] = @intCast(u8, tx | (r >> 12) & maskx);
-        p[2] = @intCast(u8, tx | (r >> 6) & maskx);
-        p[3] = @intCast(u8, tx | r & maskx);
+        p[1] = @intCast(u8, tx | ((r >> 12) & maskx));
+        p[2] = @intCast(u8, tx | ((r >> 6) & maskx));
+        p[3] = @intCast(u8, tx | (r & maskx));
         return 4;
     }
     return error.RuneError;
