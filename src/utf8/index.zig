@@ -133,7 +133,7 @@ pub fn decodeRune(p: []const u8) !Rune {
         // approach prevents an additional branch.
         const mask = @intCast(i32, x) << 31 >> 31;
         return Rune{
-            .value = @intCast(i32, p[0]) & ~mask | rune_error & mask,
+            .value = (@intCast(i32, p[0]) & ~mask) | (rune_error & mask),
             .size = 1,
         };
     }
