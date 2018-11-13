@@ -61,7 +61,7 @@ fn to_case(_case: base.Case, rune: i32, case_range: []base.CaseRange) toResult {
                 // is odd so we take the low bit from _case.
                 var i: i32 = 1;
                 return toResult{
-                    .mapped = @intCast(i32, cr.lo) + ((rune - @intCast(i32, cr.lo)) & ~i | _case.rune() & 1),
+                    .mapped = @intCast(i32, cr.lo) + ((rune - @intCast(i32, cr.lo)) & ~i | (_case.rune() & 1)),
                     .found_mapping = true,
                 };
             }
