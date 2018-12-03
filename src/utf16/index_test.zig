@@ -1,11 +1,11 @@
-const unicode = @import("../index.zig");
+const unicode = @import("../unicode.zig");
 const utf16 = @import("index.zig");
 const t = @import("../util/index.zig");
 const std = @import("std");
 const mem = std.mem;
 
 test "constants" {
-    if (utf16.max_rune != unicode.base.max_rune) {
+    if (utf16.max_rune != unicode.tables.max_rune) {
         try t.terror("utf16.max_rune is wrong");
     }
 }
@@ -43,11 +43,11 @@ test "encodeRune" {
         var j: usize = 0;
         for (tt.in) |r| {
             const pair = utf16.encodeRune(r);
-            if (r < 0x10000 or r > unicode.base.max_rune) {
+            if (r < 0x10000 or r > unicode.tables.max_rune) {
                 if (j >= tt.out.len) {
                     try t.terrorf("#{} ran out of tt.out \n", i);
                 }
-                if (pair.r1 != unicode.base.replacement_char or pair.r2 != unicode.base.replacement_char) {
+                if (pair.r1 != unicode.tables.replacement_char or pair.r2 != unicode.tables.replacement_char) {
                     try t.terrorf("encodeRune(0x{x})= 0x{x}, 0x{x} want 0xfffd, 0xfffd\n", r, pair.r1, pair.r2);
                 }
                 j += 1;

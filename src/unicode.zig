@@ -1,4 +1,4 @@
-const tables = @import("tables.zig");
+pub const tables = @import("tables.zig");
 const warn = @import("std").debug.warn;
 
 pub fn is16(ranges: []const tables.Range16, r: u16) bool {

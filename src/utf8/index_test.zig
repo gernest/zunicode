@@ -1,13 +1,13 @@
 const utf8 = @import("index.zig");
-const unicode = @import("../index.zig");
+const unicode = @import("../unicode.zig");
 const t = @import("../util/index.zig");
 const std = @import("std");
 
 test "init" {
-    if (utf8.max_rune != unicode.base.max_rune) {
+    if (utf8.max_rune != unicode.tables.max_rune) {
         try t.terror("wrong utf8.max_rune");
     }
-    if (utf8.rune_error != unicode.base.replacement_char) {
+    if (utf8.rune_error != unicode.tables.replacement_char) {
         try t.terror("wrong utf8.rune_error");
     }
 }
