@@ -1,32 +1,111 @@
 pub const base = @import("base.zig");
-const letter = @import("letter.zig");
 const tables = @import("tables.zig");
 const warn = @import("std").debug.warn;
 
-/// isUpper reports whether the rune is an upper case letter.
+pub fn is16(ranges: []const base.Range16, r: u16) bool {
+    if (ranges.len <= base.linear_max or r <= base.linear_max) {
+        for (ranges) |*range| {
+            if (r < range.lo) {
+                return false;
+            }
+            if (r <= range.hi) {
+                return range.stride == 1 or (r - range.lo) % range.stride == 0;
+            }
+        }
+        return false;
+    }
+    var lo: usize = 0;
+    var hi: usize = ranges.len;
+    while (lo < hi) {
+        const m: usize = lo + ((hi - lo) / 2);
+        const range = &ranges[m];
+        if (range.lo <= r and r <= range.hi) {
+            return range.stride == 1 or (r - range.lo) % range.stride == 0;
+        }
+        if (r < range.lo) {
+            hi = m;
+        } else {
+            lo = m + 1;
+        }
+    }
+    return false;
+}
+
+pub fn is32(ranges: []base.Range32, r: u32) bool {
+    if (ranges.len <= base.linear_max) {
+        for (ranges) |*range| {
+            if (r < range.lo) {
+                return false;
+            }
+            if (r <= range.hi) {
+                return range.stride == 1 or (r - range.lo) % range.stride == 0;
+            }
+        }
+        return false;
+    }
+    var lo: usize = 0;
+    var hi: usize = ranges.len;
+    while (lo < hi) {
+        const m: usize = lo + (hi - lo) / 2;
+        const range = &ranges[m];
+        if (range.lo <= r and r <= range.hi) {
+            return range.stride == 1 or (r - range.lo) % range.stride == 0;
+        }
+        if (r < range.lo) {
+            hi = m;
+        } else {
+            lo = m + 1;
+        }
+    }
+    return false;
+}
+
+pub fn is(range_tab: *const base.RangeTable, r: i32) bool {
+    if (range_tab.r16.len > 0 and r <= @intCast(i32, range_tab.r16[range_tab.r16.len - 1].hi)) {
+        return is16(range_tab.r16, @intCast(u16, r));
+    }
+    if (range_tab.r32.len > 0 and r > @intCast(i32, range_tab.r32[0].lo)) {
+        return is32(range_tab.r32, @intCast(u32, r));
+    }
+    return false;
+}
+
+pub fn isExcludingLatin(range_tab: *const base.RangeTable, r: i32) bool {
+    const off = range_tab.latin_offset;
+    const r16_len = range_tab.r16.len;
+    if (r16_len > off and r <= @intCast(i32, range_tab.r16[r16_len - 1].hi)) {
+        return is16(range_tab.r16[off..], @intCast(u16, r));
+    }
+    if (range_tab.r32.len > 0 and r >= @intCast(i32, range_tab.r32[0].lo)) {
+        return is32(range_tab.r32, @intCast(u32, r));
+    }
+    return false;
+}
+
+/// isUpper reports whether the rune is an upper case
 pub fn isUpper(rune: i32) bool {
     if (rune <= base.max_latin1) {
         const p = tables.properties[@intCast(usize, rune)];
         return (p & base.pLmask) == base.pLu;
     }
-    return letter.isExcludingLatin(tables.Upper, rune);
+    return isExcludingLatin(tables.Upper, rune);
 }
 
-// isLower reports whether the rune is a lower case letter.
+// isLower reports whether the rune is a lower case
 pub fn isLower(rune: i32) bool {
     if (rune <= base.max_latin1) {
         const p = tables.properties[@intCast(usize, rune)];
         return (p & base.pLmask) == base.pLl;
     }
-    return letter.isExcludingLatin(tables.Lower, rune);
+    return isExcludingLatin(tables.Lower, rune);
 }
 
-// IsTitle reports whether the rune is a title case letter.
+// IsTitle reports whether the rune is a title case
 pub fn isTitle(rune: u32) bool {
     if (rune <= base.max_latin1) {
         return false;
     }
-    return letter.isExcludingLatin(tables.Title, rune);
+    return isExcludingLatin(tables.Title, rune);
 }
 
 const toResult = struct {
@@ -177,7 +256,7 @@ pub const print_ranges = []*const base.RangeTable{
 
 pub fn in(r: i32, ranges: []const *const base.RangeTable) bool {
     for (ranges) |inside| {
-        if (letter.is(inside, r)) {
+        if (is(inside, r)) {
             return true;
         }
     }
@@ -225,13 +304,13 @@ pub fn isLetter(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pLmask != 0;
     }
-    return letter.isExcludingLatin(tables.Letter, r);
+    return isExcludingLatin(tables.Letter, r);
 }
 
 // IsMark reports whether the rune is a mark character (category M).
 pub fn isMark(r: i32) bool {
     // There are no mark characters in Latin-1.
-    return letter.isExcludingLatin(tables.Mark, r);
+    return isExcludingLatin(tables.Mark, r);
 }
 
 // IsNumber reports whether the rune is a number (category N).
@@ -239,7 +318,7 @@ pub fn isNumber(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pN != 0;
     }
-    return letter.isExcludingLatin(tables.Number, r);
+    return isExcludingLatin(tables.Number, r);
 }
 
 // IsPunct reports whether the rune is a Unicode punctuation character
@@ -248,7 +327,7 @@ pub fn isPunct(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pP != 0;
     }
-    return letter.is(tables.Punct, r);
+    return is(tables.Punct, r);
 }
 
 // IsSpace reports whether the rune is a space character as defined
@@ -264,7 +343,7 @@ pub fn isSpace(r: i32) bool {
             else => return false,
         }
     }
-    return letter.isExcludingLatin(tables.White_Space, r);
+    return isExcludingLatin(tables.White_Space, r);
 }
 
 // IsSymbol reports whether the rune is a symbolic character.
@@ -272,7 +351,7 @@ pub fn isSymbol(r: i32) bool {
     if (r <= base.max_latin1) {
         return tables.properties[@intCast(usize, r)] & base.pS != 0;
     }
-    return letter.isExcludingLatin(tables.Symbol, r);
+    return isExcludingLatin(tables.Symbol, r);
 }
 
 // isDigit reports whether the rune is a decimal digit.
@@ -280,5 +359,5 @@ pub fn isDigit(r: i32) bool {
     if (r <= base.max_latin1) {
         return '0' <= r and r <= '9';
     }
-    return letter.isExcludingLatin(tables.Digit, r);
+    return isExcludingLatin(tables.Digit, r);
 }

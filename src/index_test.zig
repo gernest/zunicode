@@ -1,5 +1,4 @@
 const base = @import("base.zig");
-const letter = @import("letter.zig");
 const tables = @import("tables.zig");
 const unicode = @import("index.zig");
 const t = @import("./util/index.zig");
@@ -263,7 +262,7 @@ test "isLetterLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isLetter(i);
-        const want = letter.is(tables.Letter, i);
+        const want = unicode.is(tables.Letter, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -275,7 +274,7 @@ test "isUpperLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isUpper(i);
-        const want = letter.is(tables.Upper, i);
+        const want = unicode.is(tables.Upper, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -287,7 +286,7 @@ test "isLowerLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isLower(i);
-        const want = letter.is(tables.Lower, i);
+        const want = unicode.is(tables.Lower, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -299,7 +298,7 @@ test "isNumberLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isNumber(i);
-        const want = letter.is(tables.Number, i);
+        const want = unicode.is(tables.Number, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -338,7 +337,7 @@ test "isPunctLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isPunct(i);
-        const want = letter.is(tables.Punct, i);
+        const want = unicode.is(tables.Punct, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -350,7 +349,7 @@ test "isSpaceLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isSpace(i);
-        const want = letter.is(tables.White_Space, i);
+        const want = unicode.is(tables.White_Space, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -362,7 +361,7 @@ test "isSymbolLatin1" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isSymbol(i);
-        const want = letter.is(tables.Symbol, i);
+        const want = unicode.is(tables.Symbol, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
@@ -482,7 +481,7 @@ test "DigitOptimization" {
     var i: i32 = 0;
     while (i <= base.max_latin1) {
         const got = unicode.isDigit(i);
-        const want = letter.is(tables.Digit, i);
+        const want = unicode.is(tables.Digit, i);
         if (got != want) {
             try t.terrorf("{} got {} wanted {}\n", i, got, want);
         }
