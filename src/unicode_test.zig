@@ -249,7 +249,7 @@ test "to" {
 
 test "isControlLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isControl(i);
         var want: bool = false;
         if (0x00 <= i and i <= 0x1F) {
@@ -261,65 +261,60 @@ test "isControlLatin1" {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isLetterLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isLetter(i);
         const want = unicode.is(tables.Letter, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isUpperLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isUpper(i);
         const want = unicode.is(tables.Upper, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isLowerLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isLower(i);
         const want = unicode.is(tables.Lower, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isNumberLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isNumber(i);
         const want = unicode.is(tables.Number, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isPrintLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isPrint(i);
         var want = unicode.in(i, unicode.print_ranges[0..]);
         if (i == ' ') {
@@ -329,59 +324,54 @@ test "isPrintLatin1" {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isGraphicLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isGraphic(i);
         var want = unicode.in(i, unicode.graphic_ranges[0..]);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isPunctLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isPunct(i);
         const want = unicode.is(tables.Punct, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isSpaceLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isSpace(i);
         const want = unicode.is(tables.White_Space, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
 test "isSymbolLatin1" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isSymbol(i);
         const want = unicode.is(tables.Symbol, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
 
@@ -497,13 +487,12 @@ test "isDigit" {
 
 test "DigitOptimization" {
     var i: i32 = 0;
-    while (i <= tables.max_latin1) {
+    while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isDigit(i);
         const want = unicode.is(tables.Digit, i);
         if (got != want) {
             warn("{} got {} wanted {}\n", i, got, want);
             return test_failed;
         }
-        i += 1;
     }
 }
