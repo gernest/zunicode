@@ -6,11 +6,86 @@
 // To regenerate, run:
 //  maketables --tables=all --data=http://www.unicode.org/Public/10.0.0/ucd/UnicodeData.txt --casefolding=http://www.unicode.org/Public/10.0.0/ucd/CaseFolding.txt
 
-const base = @import("base.zig");
-const RangeTable = base.RangeTable;
-const Range16 = base.Range16;
-const Range32 = base.Range32;
-const CaseRange = base.CaseRange;
+pub const max_rune: i32 = 0x10ffff;
+pub const replacement_char: i32 = 0xfffd;
+pub const max_ascii: i32 = 0x7f;
+pub const max_latin1: i32 = 0xff;
+
+pub const pC: u8 = 1;
+pub const pP: u8 = 2;
+pub const pN: u8 = 4;
+pub const pS: u8 = 8;
+pub const pZ: u8 = 16;
+pub const pLu: u8 = 32;
+pub const pLl: u8 = 64;
+pub const pp: u8 = 128;
+pub const pg: u8 = 144;
+pub const pLo: u8 = 96;
+pub const pLmask: u8 = 96;
+
+/// If the Delta field of a CaseRange is UpperLower, it means
+/// this CaseRange represents a sequence of the form (say)
+/// Upper Lower Upper Lower.
+pub const upper_lower: i32 = @intCast(i32, max_rune) + 1;
+
+pub const RangeTable = struct {
+    r16: []Range16,
+    r32: []Range32,
+    latin_offset: usize,
+};
+
+pub const Range16 = struct {
+    lo: u16,
+    hi: u16,
+    stride: u16,
+
+    pub fn init(lo: u16, hi: u16, stride: u16) Range16 {
+        return Range16{ .lo = lo, .hi = hi, .stride = stride };
+    }
+};
+
+pub const Range32 = struct {
+    lo: u32,
+    hi: u32,
+    stride: u32,
+
+    pub fn init(lo: u32, hi: u32, stride: u32) Range32 {
+        return Range32{ .lo = lo, .hi = hi, .stride = stride };
+    }
+};
+
+pub const Case = enum(usize) {
+    Upper,
+    Lower,
+    Title,
+    Max,
+
+    pub fn rune(self: Case) i32 {
+        return @intCast(i32, @enumToInt(self));
+    }
+};
+
+pub const CaseRange = struct {
+    lo: u32,
+    hi: u32,
+    delta: []const i32,
+
+    pub fn init(lo: u32, hi: u32, delta: []const i32) CaseRange {
+        return CaseRange{ .lo = lo, .hi = hi, .delta = delta };
+    }
+};
+
+pub const linear_max: usize = 18;
+
+pub const FoldPair = struct {
+    from: u16,
+    to: u16,
+
+    pub fn init(from: u16, to: u16) FoldPair {
+        return FoldPair{ .from = from, .to = to };
+    }
+};
+
 // Version is the Unicode edition from which the tables are derived.
 pub const Version = "10.0.0";
 
@@ -7659,49 +7734,49 @@ const _CaseRanges = init: {
         CaseRange.init(0x00E0, 0x00F6, []const i32{ -32, 0, -32 }),
         CaseRange.init(0x00F8, 0x00FE, []const i32{ -32, 0, -32 }),
         CaseRange.init(0x00FF, 0x00FF, []const i32{ 121, 0, 121 }),
-        CaseRange.init(0x0100, 0x012F, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0100, 0x012F, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0130, 0x0130, []const i32{ 0, -199, 0 }),
         CaseRange.init(0x0131, 0x0131, []const i32{ -232, 0, -232 }),
-        CaseRange.init(0x0132, 0x0137, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x0139, 0x0148, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x014A, 0x0177, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0132, 0x0137, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x0139, 0x0148, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x014A, 0x0177, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0178, 0x0178, []const i32{ 0, -121, 0 }),
-        CaseRange.init(0x0179, 0x017E, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0179, 0x017E, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x017F, 0x017F, []const i32{ -300, 0, -300 }),
         CaseRange.init(0x0180, 0x0180, []const i32{ 195, 0, 195 }),
         CaseRange.init(0x0181, 0x0181, []const i32{ 0, 210, 0 }),
-        CaseRange.init(0x0182, 0x0185, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0182, 0x0185, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0186, 0x0186, []const i32{ 0, 206, 0 }),
-        CaseRange.init(0x0187, 0x0188, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0187, 0x0188, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0189, 0x018A, []const i32{ 0, 205, 0 }),
-        CaseRange.init(0x018B, 0x018C, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x018B, 0x018C, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x018E, 0x018E, []const i32{ 0, 79, 0 }),
         CaseRange.init(0x018F, 0x018F, []const i32{ 0, 202, 0 }),
         CaseRange.init(0x0190, 0x0190, []const i32{ 0, 203, 0 }),
-        CaseRange.init(0x0191, 0x0192, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0191, 0x0192, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0193, 0x0193, []const i32{ 0, 205, 0 }),
         CaseRange.init(0x0194, 0x0194, []const i32{ 0, 207, 0 }),
         CaseRange.init(0x0195, 0x0195, []const i32{ 97, 0, 97 }),
         CaseRange.init(0x0196, 0x0196, []const i32{ 0, 211, 0 }),
         CaseRange.init(0x0197, 0x0197, []const i32{ 0, 209, 0 }),
-        CaseRange.init(0x0198, 0x0199, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0198, 0x0199, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x019A, 0x019A, []const i32{ 163, 0, 163 }),
         CaseRange.init(0x019C, 0x019C, []const i32{ 0, 211, 0 }),
         CaseRange.init(0x019D, 0x019D, []const i32{ 0, 213, 0 }),
         CaseRange.init(0x019E, 0x019E, []const i32{ 130, 0, 130 }),
         CaseRange.init(0x019F, 0x019F, []const i32{ 0, 214, 0 }),
-        CaseRange.init(0x01A0, 0x01A5, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01A0, 0x01A5, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01A6, 0x01A6, []const i32{ 0, 218, 0 }),
-        CaseRange.init(0x01A7, 0x01A8, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01A7, 0x01A8, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01A9, 0x01A9, []const i32{ 0, 218, 0 }),
-        CaseRange.init(0x01AC, 0x01AD, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01AC, 0x01AD, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01AE, 0x01AE, []const i32{ 0, 218, 0 }),
-        CaseRange.init(0x01AF, 0x01B0, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01AF, 0x01B0, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01B1, 0x01B2, []const i32{ 0, 217, 0 }),
-        CaseRange.init(0x01B3, 0x01B6, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01B3, 0x01B6, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01B7, 0x01B7, []const i32{ 0, 219, 0 }),
-        CaseRange.init(0x01B8, 0x01B9, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x01BC, 0x01BD, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01B8, 0x01B9, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x01BC, 0x01BD, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01BF, 0x01BF, []const i32{ 56, 0, 56 }),
         CaseRange.init(0x01C4, 0x01C4, []const i32{ 0, 2, 1 }),
         CaseRange.init(0x01C5, 0x01C5, []const i32{ -1, 1, 0 }),
@@ -7712,28 +7787,28 @@ const _CaseRanges = init: {
         CaseRange.init(0x01CA, 0x01CA, []const i32{ 0, 2, 1 }),
         CaseRange.init(0x01CB, 0x01CB, []const i32{ -1, 1, 0 }),
         CaseRange.init(0x01CC, 0x01CC, []const i32{ -2, 0, -1 }),
-        CaseRange.init(0x01CD, 0x01DC, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01CD, 0x01DC, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01DD, 0x01DD, []const i32{ -79, 0, -79 }),
-        CaseRange.init(0x01DE, 0x01EF, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01DE, 0x01EF, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01F1, 0x01F1, []const i32{ 0, 2, 1 }),
         CaseRange.init(0x01F2, 0x01F2, []const i32{ -1, 1, 0 }),
         CaseRange.init(0x01F3, 0x01F3, []const i32{ -2, 0, -1 }),
-        CaseRange.init(0x01F4, 0x01F5, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01F4, 0x01F5, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x01F6, 0x01F6, []const i32{ 0, -97, 0 }),
         CaseRange.init(0x01F7, 0x01F7, []const i32{ 0, -56, 0 }),
-        CaseRange.init(0x01F8, 0x021F, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x01F8, 0x021F, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0220, 0x0220, []const i32{ 0, -130, 0 }),
-        CaseRange.init(0x0222, 0x0233, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0222, 0x0233, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x023A, 0x023A, []const i32{ 0, 10795, 0 }),
-        CaseRange.init(0x023B, 0x023C, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x023B, 0x023C, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x023D, 0x023D, []const i32{ 0, -163, 0 }),
         CaseRange.init(0x023E, 0x023E, []const i32{ 0, 10792, 0 }),
         CaseRange.init(0x023F, 0x0240, []const i32{ 10815, 0, 10815 }),
-        CaseRange.init(0x0241, 0x0242, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0241, 0x0242, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0243, 0x0243, []const i32{ 0, -195, 0 }),
         CaseRange.init(0x0244, 0x0244, []const i32{ 0, 69, 0 }),
         CaseRange.init(0x0245, 0x0245, []const i32{ 0, 71, 0 }),
-        CaseRange.init(0x0246, 0x024F, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0246, 0x024F, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0250, 0x0250, []const i32{ 10783, 0, 10783 }),
         CaseRange.init(0x0251, 0x0251, []const i32{ 10780, 0, 10780 }),
         CaseRange.init(0x0252, 0x0252, []const i32{ 10782, 0, 10782 }),
@@ -7769,8 +7844,8 @@ const _CaseRanges = init: {
         CaseRange.init(0x029D, 0x029D, []const i32{ 42261, 0, 42261 }),
         CaseRange.init(0x029E, 0x029E, []const i32{ 42258, 0, 42258 }),
         CaseRange.init(0x0345, 0x0345, []const i32{ 84, 0, 84 }),
-        CaseRange.init(0x0370, 0x0373, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x0376, 0x0377, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0370, 0x0373, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x0376, 0x0377, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x037B, 0x037D, []const i32{ 130, 0, 130 }),
         CaseRange.init(0x037F, 0x037F, []const i32{ 0, 116, 0 }),
         CaseRange.init(0x0386, 0x0386, []const i32{ 0, 38, 0 }),
@@ -7792,27 +7867,27 @@ const _CaseRanges = init: {
         CaseRange.init(0x03D5, 0x03D5, []const i32{ -47, 0, -47 }),
         CaseRange.init(0x03D6, 0x03D6, []const i32{ -54, 0, -54 }),
         CaseRange.init(0x03D7, 0x03D7, []const i32{ -8, 0, -8 }),
-        CaseRange.init(0x03D8, 0x03EF, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x03D8, 0x03EF, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x03F0, 0x03F0, []const i32{ -86, 0, -86 }),
         CaseRange.init(0x03F1, 0x03F1, []const i32{ -80, 0, -80 }),
         CaseRange.init(0x03F2, 0x03F2, []const i32{ 7, 0, 7 }),
         CaseRange.init(0x03F3, 0x03F3, []const i32{ -116, 0, -116 }),
         CaseRange.init(0x03F4, 0x03F4, []const i32{ 0, -60, 0 }),
         CaseRange.init(0x03F5, 0x03F5, []const i32{ -96, 0, -96 }),
-        CaseRange.init(0x03F7, 0x03F8, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x03F7, 0x03F8, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x03F9, 0x03F9, []const i32{ 0, -7, 0 }),
-        CaseRange.init(0x03FA, 0x03FB, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x03FA, 0x03FB, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x03FD, 0x03FF, []const i32{ 0, -130, 0 }),
         CaseRange.init(0x0400, 0x040F, []const i32{ 0, 80, 0 }),
         CaseRange.init(0x0410, 0x042F, []const i32{ 0, 32, 0 }),
         CaseRange.init(0x0430, 0x044F, []const i32{ -32, 0, -32 }),
         CaseRange.init(0x0450, 0x045F, []const i32{ -80, 0, -80 }),
-        CaseRange.init(0x0460, 0x0481, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x048A, 0x04BF, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x0460, 0x0481, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x048A, 0x04BF, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x04C0, 0x04C0, []const i32{ 0, 15, 0 }),
-        CaseRange.init(0x04C1, 0x04CE, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x04C1, 0x04CE, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x04CF, 0x04CF, []const i32{ -15, 0, -15 }),
-        CaseRange.init(0x04D0, 0x052F, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x04D0, 0x052F, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x0531, 0x0556, []const i32{ 0, 48, 0 }),
         CaseRange.init(0x0561, 0x0586, []const i32{ -48, 0, -48 }),
         CaseRange.init(0x10A0, 0x10C5, []const i32{ 0, 7264, 0 }),
@@ -7831,10 +7906,10 @@ const _CaseRanges = init: {
         CaseRange.init(0x1C88, 0x1C88, []const i32{ 35266, 0, 35266 }),
         CaseRange.init(0x1D79, 0x1D79, []const i32{ 35332, 0, 35332 }),
         CaseRange.init(0x1D7D, 0x1D7D, []const i32{ 3814, 0, 3814 }),
-        CaseRange.init(0x1E00, 0x1E95, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x1E00, 0x1E95, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x1E9B, 0x1E9B, []const i32{ -59, 0, -59 }),
         CaseRange.init(0x1E9E, 0x1E9E, []const i32{ 0, -7615, 0 }),
-        CaseRange.init(0x1EA0, 0x1EFF, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x1EA0, 0x1EFF, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x1F00, 0x1F07, []const i32{ 8, 0, 8 }),
         CaseRange.init(0x1F08, 0x1F0F, []const i32{ 0, -8, 0 }),
         CaseRange.init(0x1F10, 0x1F15, []const i32{ 8, 0, 8 }),
@@ -7895,42 +7970,42 @@ const _CaseRanges = init: {
         CaseRange.init(0x214E, 0x214E, []const i32{ -28, 0, -28 }),
         CaseRange.init(0x2160, 0x216F, []const i32{ 0, 16, 0 }),
         CaseRange.init(0x2170, 0x217F, []const i32{ -16, 0, -16 }),
-        CaseRange.init(0x2183, 0x2184, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x2183, 0x2184, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x24B6, 0x24CF, []const i32{ 0, 26, 0 }),
         CaseRange.init(0x24D0, 0x24E9, []const i32{ -26, 0, -26 }),
         CaseRange.init(0x2C00, 0x2C2E, []const i32{ 0, 48, 0 }),
         CaseRange.init(0x2C30, 0x2C5E, []const i32{ -48, 0, -48 }),
-        CaseRange.init(0x2C60, 0x2C61, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x2C60, 0x2C61, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x2C62, 0x2C62, []const i32{ 0, -10743, 0 }),
         CaseRange.init(0x2C63, 0x2C63, []const i32{ 0, -3814, 0 }),
         CaseRange.init(0x2C64, 0x2C64, []const i32{ 0, -10727, 0 }),
         CaseRange.init(0x2C65, 0x2C65, []const i32{ -10795, 0, -10795 }),
         CaseRange.init(0x2C66, 0x2C66, []const i32{ -10792, 0, -10792 }),
-        CaseRange.init(0x2C67, 0x2C6C, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x2C67, 0x2C6C, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x2C6D, 0x2C6D, []const i32{ 0, -10780, 0 }),
         CaseRange.init(0x2C6E, 0x2C6E, []const i32{ 0, -10749, 0 }),
         CaseRange.init(0x2C6F, 0x2C6F, []const i32{ 0, -10783, 0 }),
         CaseRange.init(0x2C70, 0x2C70, []const i32{ 0, -10782, 0 }),
-        CaseRange.init(0x2C72, 0x2C73, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x2C75, 0x2C76, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x2C72, 0x2C73, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x2C75, 0x2C76, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x2C7E, 0x2C7F, []const i32{ 0, -10815, 0 }),
-        CaseRange.init(0x2C80, 0x2CE3, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x2CEB, 0x2CEE, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0x2CF2, 0x2CF3, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0x2C80, 0x2CE3, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x2CEB, 0x2CEE, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0x2CF2, 0x2CF3, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0x2D00, 0x2D25, []const i32{ -7264, 0, -7264 }),
         CaseRange.init(0x2D27, 0x2D27, []const i32{ -7264, 0, -7264 }),
         CaseRange.init(0x2D2D, 0x2D2D, []const i32{ -7264, 0, -7264 }),
-        CaseRange.init(0xA640, 0xA66D, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0xA680, 0xA69B, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0xA722, 0xA72F, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0xA732, 0xA76F, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0xA779, 0xA77C, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0xA640, 0xA66D, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0xA680, 0xA69B, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0xA722, 0xA72F, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0xA732, 0xA76F, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0xA779, 0xA77C, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0xA77D, 0xA77D, []const i32{ 0, -35332, 0 }),
-        CaseRange.init(0xA77E, 0xA787, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0xA78B, 0xA78C, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0xA77E, 0xA787, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0xA78B, 0xA78C, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0xA78D, 0xA78D, []const i32{ 0, -42280, 0 }),
-        CaseRange.init(0xA790, 0xA793, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
-        CaseRange.init(0xA796, 0xA7A9, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0xA790, 0xA793, []const i32{ upper_lower, upper_lower, upper_lower }),
+        CaseRange.init(0xA796, 0xA7A9, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0xA7AA, 0xA7AA, []const i32{ 0, -42308, 0 }),
         CaseRange.init(0xA7AB, 0xA7AB, []const i32{ 0, -42319, 0 }),
         CaseRange.init(0xA7AC, 0xA7AC, []const i32{ 0, -42315, 0 }),
@@ -7940,7 +8015,7 @@ const _CaseRanges = init: {
         CaseRange.init(0xA7B1, 0xA7B1, []const i32{ 0, -42282, 0 }),
         CaseRange.init(0xA7B2, 0xA7B2, []const i32{ 0, -42261, 0 }),
         CaseRange.init(0xA7B3, 0xA7B3, []const i32{ 0, 928, 0 }),
-        CaseRange.init(0xA7B4, 0xA7B7, []const i32{ base.upper_lower, base.upper_lower, base.upper_lower }),
+        CaseRange.init(0xA7B4, 0xA7B7, []const i32{ upper_lower, upper_lower, upper_lower }),
         CaseRange.init(0xAB53, 0xAB53, []const i32{ -928, 0, -928 }),
         CaseRange.init(0xAB70, 0xABBF, []const i32{ -38864, 0, -38864 }),
         CaseRange.init(0xFF21, 0xFF3A, []const i32{ 0, 32, 0 }),
@@ -7960,262 +8035,262 @@ const _CaseRanges = init: {
 };
 pub const properties = init: {
     var s = []u8{0} ** 1114112;
-    s[0x00] = base.pC; // '\x00'
-    s[0x01] = base.pC; // '\x01'
-    s[0x02] = base.pC; // '\x02'
-    s[0x03] = base.pC; // '\x03'
-    s[0x04] = base.pC; // '\x04'
-    s[0x05] = base.pC; // '\x05'
-    s[0x06] = base.pC; // '\x06'
-    s[0x07] = base.pC; // '\a'
-    s[0x08] = base.pC; // '\b'
-    s[0x09] = base.pC; // '\t'
-    s[0x0A] = base.pC; // '\n'
-    s[0x0B] = base.pC; // '\v'
-    s[0x0C] = base.pC; // '\f'
-    s[0x0D] = base.pC; // '\r'
-    s[0x0E] = base.pC; // '\x0e'
-    s[0x0F] = base.pC; // '\x0f'
-    s[0x10] = base.pC; // '\x10'
-    s[0x11] = base.pC; // '\x11'
-    s[0x12] = base.pC; // '\x12'
-    s[0x13] = base.pC; // '\x13'
-    s[0x14] = base.pC; // '\x14'
-    s[0x15] = base.pC; // '\x15'
-    s[0x16] = base.pC; // '\x16'
-    s[0x17] = base.pC; // '\x17'
-    s[0x18] = base.pC; // '\x18'
-    s[0x19] = base.pC; // '\x19'
-    s[0x1A] = base.pC; // '\x1a'
-    s[0x1B] = base.pC; // '\x1b'
-    s[0x1C] = base.pC; // '\x1c'
-    s[0x1D] = base.pC; // '\x1d'
-    s[0x1E] = base.pC; // '\x1e'
-    s[0x1F] = base.pC; // '\x1f'
-    s[0x20] = base.pZ | base.pp; // ' '
-    s[0x21] = base.pP | base.pp; // '!'
-    s[0x22] = base.pP | base.pp; // '"'
-    s[0x23] = base.pP | base.pp; // '#'
-    s[0x24] = base.pS | base.pp; // '$'
-    s[0x25] = base.pP | base.pp; // '%'
-    s[0x26] = base.pP | base.pp; // '&'
-    s[0x27] = base.pP | base.pp; // '\''
-    s[0x28] = base.pP | base.pp; // '('
-    s[0x29] = base.pP | base.pp; // ')'
-    s[0x2A] = base.pP | base.pp; // '*'
-    s[0x2B] = base.pS | base.pp; // '+'
-    s[0x2C] = base.pP | base.pp; // ','
-    s[0x2D] = base.pP | base.pp; // '-'
-    s[0x2E] = base.pP | base.pp; // '.'
-    s[0x2F] = base.pP | base.pp; // '/'
-    s[0x30] = base.pN | base.pp; // '0'
-    s[0x31] = base.pN | base.pp; // '1'
-    s[0x32] = base.pN | base.pp; // '2'
-    s[0x33] = base.pN | base.pp; // '3'
-    s[0x34] = base.pN | base.pp; // '4'
-    s[0x35] = base.pN | base.pp; // '5'
-    s[0x36] = base.pN | base.pp; // '6'
-    s[0x37] = base.pN | base.pp; // '7'
-    s[0x38] = base.pN | base.pp; // '8'
-    s[0x39] = base.pN | base.pp; // '9'
-    s[0x3A] = base.pP | base.pp; // ':'
-    s[0x3B] = base.pP | base.pp; // ';'
-    s[0x3C] = base.pS | base.pp; // '<'
-    s[0x3D] = base.pS | base.pp; // '='
-    s[0x3E] = base.pS | base.pp; // '>'
-    s[0x3F] = base.pP | base.pp; // '?'
-    s[0x40] = base.pP | base.pp; // '@'
-    s[0x41] = base.pLu | base.pp; // 'A'
-    s[0x42] = base.pLu | base.pp; // 'B'
-    s[0x43] = base.pLu | base.pp; // 'C'
-    s[0x44] = base.pLu | base.pp; // 'D'
-    s[0x45] = base.pLu | base.pp; // 'E'
-    s[0x46] = base.pLu | base.pp; // 'F'
-    s[0x47] = base.pLu | base.pp; // 'G'
-    s[0x48] = base.pLu | base.pp; // 'H'
-    s[0x49] = base.pLu | base.pp; // 'I'
-    s[0x4A] = base.pLu | base.pp; // 'J'
-    s[0x4B] = base.pLu | base.pp; // 'K'
-    s[0x4C] = base.pLu | base.pp; // 'L'
-    s[0x4D] = base.pLu | base.pp; // 'M'
-    s[0x4E] = base.pLu | base.pp; // 'N'
-    s[0x4F] = base.pLu | base.pp; // 'O'
-    s[0x50] = base.pLu | base.pp; // 'P'
-    s[0x51] = base.pLu | base.pp; // 'Q'
-    s[0x52] = base.pLu | base.pp; // 'R'
-    s[0x53] = base.pLu | base.pp; // 'S'
-    s[0x54] = base.pLu | base.pp; // 'T'
-    s[0x55] = base.pLu | base.pp; // 'U'
-    s[0x56] = base.pLu | base.pp; // 'V'
-    s[0x57] = base.pLu | base.pp; // 'W'
-    s[0x58] = base.pLu | base.pp; // 'X'
-    s[0x59] = base.pLu | base.pp; // 'Y'
-    s[0x5A] = base.pLu | base.pp; // 'Z'
-    s[0x5B] = base.pP | base.pp; // '['
-    s[0x5C] = base.pP | base.pp; // '\\'
-    s[0x5D] = base.pP | base.pp; // ']'
-    s[0x5E] = base.pS | base.pp; // '^'
-    s[0x5F] = base.pP | base.pp; // '_'
-    s[0x60] = base.pS | base.pp; // '`'
-    s[0x61] = base.pLl | base.pp; // 'a'
-    s[0x62] = base.pLl | base.pp; // 'b'
-    s[0x63] = base.pLl | base.pp; // 'c'
-    s[0x64] = base.pLl | base.pp; // 'd'
-    s[0x65] = base.pLl | base.pp; // 'e'
-    s[0x66] = base.pLl | base.pp; // 'f'
-    s[0x67] = base.pLl | base.pp; // 'g'
-    s[0x68] = base.pLl | base.pp; // 'h'
-    s[0x69] = base.pLl | base.pp; // 'i'
-    s[0x6A] = base.pLl | base.pp; // 'j'
-    s[0x6B] = base.pLl | base.pp; // 'k'
-    s[0x6C] = base.pLl | base.pp; // 'l'
-    s[0x6D] = base.pLl | base.pp; // 'm'
-    s[0x6E] = base.pLl | base.pp; // 'n'
-    s[0x6F] = base.pLl | base.pp; // 'o'
-    s[0x70] = base.pLl | base.pp; // 'p'
-    s[0x71] = base.pLl | base.pp; // 'q'
-    s[0x72] = base.pLl | base.pp; // 'r'
-    s[0x73] = base.pLl | base.pp; // 's'
-    s[0x74] = base.pLl | base.pp; // 't'
-    s[0x75] = base.pLl | base.pp; // 'u'
-    s[0x76] = base.pLl | base.pp; // 'v'
-    s[0x77] = base.pLl | base.pp; // 'w'
-    s[0x78] = base.pLl | base.pp; // 'x'
-    s[0x79] = base.pLl | base.pp; // 'y'
-    s[0x7A] = base.pLl | base.pp; // 'z'
-    s[0x7B] = base.pP | base.pp; // '{'
-    s[0x7C] = base.pS | base.pp; // '|'
-    s[0x7D] = base.pP | base.pp; // '}'
-    s[0x7E] = base.pS | base.pp; // '~'
-    s[0x7F] = base.pC; // '\u007f'
-    s[0x80] = base.pC; // '\u0080'
-    s[0x81] = base.pC; // '\u0081'
-    s[0x82] = base.pC; // '\u0082'
-    s[0x83] = base.pC; // '\u0083'
-    s[0x84] = base.pC; // '\u0084'
-    s[0x85] = base.pC; // '\u0085'
-    s[0x86] = base.pC; // '\u0086'
-    s[0x87] = base.pC; // '\u0087'
-    s[0x88] = base.pC; // '\u0088'
-    s[0x89] = base.pC; // '\u0089'
-    s[0x8A] = base.pC; // '\u008a'
-    s[0x8B] = base.pC; // '\u008b'
-    s[0x8C] = base.pC; // '\u008c'
-    s[0x8D] = base.pC; // '\u008d'
-    s[0x8E] = base.pC; // '\u008e'
-    s[0x8F] = base.pC; // '\u008f'
-    s[0x90] = base.pC; // '\u0090'
-    s[0x91] = base.pC; // '\u0091'
-    s[0x92] = base.pC; // '\u0092'
-    s[0x93] = base.pC; // '\u0093'
-    s[0x94] = base.pC; // '\u0094'
-    s[0x95] = base.pC; // '\u0095'
-    s[0x96] = base.pC; // '\u0096'
-    s[0x97] = base.pC; // '\u0097'
-    s[0x98] = base.pC; // '\u0098'
-    s[0x99] = base.pC; // '\u0099'
-    s[0x9A] = base.pC; // '\u009a'
-    s[0x9B] = base.pC; // '\u009b'
-    s[0x9C] = base.pC; // '\u009c'
-    s[0x9D] = base.pC; // '\u009d'
-    s[0x9E] = base.pC; // '\u009e'
-    s[0x9F] = base.pC; // '\u009f'
-    s[0xA0] = base.pZ; // '\u00a0'
-    s[0xA1] = base.pP | base.pp; // '¡'
-    s[0xA2] = base.pS | base.pp; // '¢'
-    s[0xA3] = base.pS | base.pp; // '£'
-    s[0xA4] = base.pS | base.pp; // '¤'
-    s[0xA5] = base.pS | base.pp; // '¥'
-    s[0xA6] = base.pS | base.pp; // '¦'
-    s[0xA7] = base.pP | base.pp; // '§'
-    s[0xA8] = base.pS | base.pp; // '¨'
-    s[0xA9] = base.pS | base.pp; // '©'
-    s[0xAA] = base.pLo | base.pp; // 'ª'
-    s[0xAB] = base.pP | base.pp; // '«'
-    s[0xAC] = base.pS | base.pp; // '¬'
+    s[0x00] = pC; // '\x00'
+    s[0x01] = pC; // '\x01'
+    s[0x02] = pC; // '\x02'
+    s[0x03] = pC; // '\x03'
+    s[0x04] = pC; // '\x04'
+    s[0x05] = pC; // '\x05'
+    s[0x06] = pC; // '\x06'
+    s[0x07] = pC; // '\a'
+    s[0x08] = pC; // '\b'
+    s[0x09] = pC; // '\t'
+    s[0x0A] = pC; // '\n'
+    s[0x0B] = pC; // '\v'
+    s[0x0C] = pC; // '\f'
+    s[0x0D] = pC; // '\r'
+    s[0x0E] = pC; // '\x0e'
+    s[0x0F] = pC; // '\x0f'
+    s[0x10] = pC; // '\x10'
+    s[0x11] = pC; // '\x11'
+    s[0x12] = pC; // '\x12'
+    s[0x13] = pC; // '\x13'
+    s[0x14] = pC; // '\x14'
+    s[0x15] = pC; // '\x15'
+    s[0x16] = pC; // '\x16'
+    s[0x17] = pC; // '\x17'
+    s[0x18] = pC; // '\x18'
+    s[0x19] = pC; // '\x19'
+    s[0x1A] = pC; // '\x1a'
+    s[0x1B] = pC; // '\x1b'
+    s[0x1C] = pC; // '\x1c'
+    s[0x1D] = pC; // '\x1d'
+    s[0x1E] = pC; // '\x1e'
+    s[0x1F] = pC; // '\x1f'
+    s[0x20] = pZ | pp; // ' '
+    s[0x21] = pP | pp; // '!'
+    s[0x22] = pP | pp; // '"'
+    s[0x23] = pP | pp; // '#'
+    s[0x24] = pS | pp; // '$'
+    s[0x25] = pP | pp; // '%'
+    s[0x26] = pP | pp; // '&'
+    s[0x27] = pP | pp; // '\''
+    s[0x28] = pP | pp; // '('
+    s[0x29] = pP | pp; // ')'
+    s[0x2A] = pP | pp; // '*'
+    s[0x2B] = pS | pp; // '+'
+    s[0x2C] = pP | pp; // ','
+    s[0x2D] = pP | pp; // '-'
+    s[0x2E] = pP | pp; // '.'
+    s[0x2F] = pP | pp; // '/'
+    s[0x30] = pN | pp; // '0'
+    s[0x31] = pN | pp; // '1'
+    s[0x32] = pN | pp; // '2'
+    s[0x33] = pN | pp; // '3'
+    s[0x34] = pN | pp; // '4'
+    s[0x35] = pN | pp; // '5'
+    s[0x36] = pN | pp; // '6'
+    s[0x37] = pN | pp; // '7'
+    s[0x38] = pN | pp; // '8'
+    s[0x39] = pN | pp; // '9'
+    s[0x3A] = pP | pp; // ':'
+    s[0x3B] = pP | pp; // ';'
+    s[0x3C] = pS | pp; // '<'
+    s[0x3D] = pS | pp; // '='
+    s[0x3E] = pS | pp; // '>'
+    s[0x3F] = pP | pp; // '?'
+    s[0x40] = pP | pp; // '@'
+    s[0x41] = pLu | pp; // 'A'
+    s[0x42] = pLu | pp; // 'B'
+    s[0x43] = pLu | pp; // 'C'
+    s[0x44] = pLu | pp; // 'D'
+    s[0x45] = pLu | pp; // 'E'
+    s[0x46] = pLu | pp; // 'F'
+    s[0x47] = pLu | pp; // 'G'
+    s[0x48] = pLu | pp; // 'H'
+    s[0x49] = pLu | pp; // 'I'
+    s[0x4A] = pLu | pp; // 'J'
+    s[0x4B] = pLu | pp; // 'K'
+    s[0x4C] = pLu | pp; // 'L'
+    s[0x4D] = pLu | pp; // 'M'
+    s[0x4E] = pLu | pp; // 'N'
+    s[0x4F] = pLu | pp; // 'O'
+    s[0x50] = pLu | pp; // 'P'
+    s[0x51] = pLu | pp; // 'Q'
+    s[0x52] = pLu | pp; // 'R'
+    s[0x53] = pLu | pp; // 'S'
+    s[0x54] = pLu | pp; // 'T'
+    s[0x55] = pLu | pp; // 'U'
+    s[0x56] = pLu | pp; // 'V'
+    s[0x57] = pLu | pp; // 'W'
+    s[0x58] = pLu | pp; // 'X'
+    s[0x59] = pLu | pp; // 'Y'
+    s[0x5A] = pLu | pp; // 'Z'
+    s[0x5B] = pP | pp; // '['
+    s[0x5C] = pP | pp; // '\\'
+    s[0x5D] = pP | pp; // ']'
+    s[0x5E] = pS | pp; // '^'
+    s[0x5F] = pP | pp; // '_'
+    s[0x60] = pS | pp; // '`'
+    s[0x61] = pLl | pp; // 'a'
+    s[0x62] = pLl | pp; // 'b'
+    s[0x63] = pLl | pp; // 'c'
+    s[0x64] = pLl | pp; // 'd'
+    s[0x65] = pLl | pp; // 'e'
+    s[0x66] = pLl | pp; // 'f'
+    s[0x67] = pLl | pp; // 'g'
+    s[0x68] = pLl | pp; // 'h'
+    s[0x69] = pLl | pp; // 'i'
+    s[0x6A] = pLl | pp; // 'j'
+    s[0x6B] = pLl | pp; // 'k'
+    s[0x6C] = pLl | pp; // 'l'
+    s[0x6D] = pLl | pp; // 'm'
+    s[0x6E] = pLl | pp; // 'n'
+    s[0x6F] = pLl | pp; // 'o'
+    s[0x70] = pLl | pp; // 'p'
+    s[0x71] = pLl | pp; // 'q'
+    s[0x72] = pLl | pp; // 'r'
+    s[0x73] = pLl | pp; // 's'
+    s[0x74] = pLl | pp; // 't'
+    s[0x75] = pLl | pp; // 'u'
+    s[0x76] = pLl | pp; // 'v'
+    s[0x77] = pLl | pp; // 'w'
+    s[0x78] = pLl | pp; // 'x'
+    s[0x79] = pLl | pp; // 'y'
+    s[0x7A] = pLl | pp; // 'z'
+    s[0x7B] = pP | pp; // '{'
+    s[0x7C] = pS | pp; // '|'
+    s[0x7D] = pP | pp; // '}'
+    s[0x7E] = pS | pp; // '~'
+    s[0x7F] = pC; // '\u007f'
+    s[0x80] = pC; // '\u0080'
+    s[0x81] = pC; // '\u0081'
+    s[0x82] = pC; // '\u0082'
+    s[0x83] = pC; // '\u0083'
+    s[0x84] = pC; // '\u0084'
+    s[0x85] = pC; // '\u0085'
+    s[0x86] = pC; // '\u0086'
+    s[0x87] = pC; // '\u0087'
+    s[0x88] = pC; // '\u0088'
+    s[0x89] = pC; // '\u0089'
+    s[0x8A] = pC; // '\u008a'
+    s[0x8B] = pC; // '\u008b'
+    s[0x8C] = pC; // '\u008c'
+    s[0x8D] = pC; // '\u008d'
+    s[0x8E] = pC; // '\u008e'
+    s[0x8F] = pC; // '\u008f'
+    s[0x90] = pC; // '\u0090'
+    s[0x91] = pC; // '\u0091'
+    s[0x92] = pC; // '\u0092'
+    s[0x93] = pC; // '\u0093'
+    s[0x94] = pC; // '\u0094'
+    s[0x95] = pC; // '\u0095'
+    s[0x96] = pC; // '\u0096'
+    s[0x97] = pC; // '\u0097'
+    s[0x98] = pC; // '\u0098'
+    s[0x99] = pC; // '\u0099'
+    s[0x9A] = pC; // '\u009a'
+    s[0x9B] = pC; // '\u009b'
+    s[0x9C] = pC; // '\u009c'
+    s[0x9D] = pC; // '\u009d'
+    s[0x9E] = pC; // '\u009e'
+    s[0x9F] = pC; // '\u009f'
+    s[0xA0] = pZ; // '\u00a0'
+    s[0xA1] = pP | pp; // '¡'
+    s[0xA2] = pS | pp; // '¢'
+    s[0xA3] = pS | pp; // '£'
+    s[0xA4] = pS | pp; // '¤'
+    s[0xA5] = pS | pp; // '¥'
+    s[0xA6] = pS | pp; // '¦'
+    s[0xA7] = pP | pp; // '§'
+    s[0xA8] = pS | pp; // '¨'
+    s[0xA9] = pS | pp; // '©'
+    s[0xAA] = pLo | pp; // 'ª'
+    s[0xAB] = pP | pp; // '«'
+    s[0xAC] = pS | pp; // '¬'
     s[0xAD] = 0; // '\u00ad'
-    s[0xAE] = base.pS | base.pp; // '®'
-    s[0xAF] = base.pS | base.pp; // '¯'
-    s[0xB0] = base.pS | base.pp; // '°'
-    s[0xB1] = base.pS | base.pp; // '±'
-    s[0xB2] = base.pN | base.pp; // '²'
-    s[0xB3] = base.pN | base.pp; // '³'
-    s[0xB4] = base.pS | base.pp; // '´'
-    s[0xB5] = base.pLl | base.pp; // 'µ'
-    s[0xB6] = base.pP | base.pp; // '¶'
-    s[0xB7] = base.pP | base.pp; // '·'
-    s[0xB8] = base.pS | base.pp; // '¸'
-    s[0xB9] = base.pN | base.pp; // '¹'
-    s[0xBA] = base.pLo | base.pp; // 'º'
-    s[0xBB] = base.pP | base.pp; // '»'
-    s[0xBC] = base.pN | base.pp; // '¼'
-    s[0xBD] = base.pN | base.pp; // '½'
-    s[0xBE] = base.pN | base.pp; // '¾'
-    s[0xBF] = base.pP | base.pp; // '¿'
-    s[0xC0] = base.pLu | base.pp; // 'À'
-    s[0xC1] = base.pLu | base.pp; // 'Á'
-    s[0xC2] = base.pLu | base.pp; // 'Â'
-    s[0xC3] = base.pLu | base.pp; // 'Ã'
-    s[0xC4] = base.pLu | base.pp; // 'Ä'
-    s[0xC5] = base.pLu | base.pp; // 'Å'
-    s[0xC6] = base.pLu | base.pp; // 'Æ'
-    s[0xC7] = base.pLu | base.pp; // 'Ç'
-    s[0xC8] = base.pLu | base.pp; // 'È'
-    s[0xC9] = base.pLu | base.pp; // 'É'
-    s[0xCA] = base.pLu | base.pp; // 'Ê'
-    s[0xCB] = base.pLu | base.pp; // 'Ë'
-    s[0xCC] = base.pLu | base.pp; // 'Ì'
-    s[0xCD] = base.pLu | base.pp; // 'Í'
-    s[0xCE] = base.pLu | base.pp; // 'Î'
-    s[0xCF] = base.pLu | base.pp; // 'Ï'
-    s[0xD0] = base.pLu | base.pp; // 'Ð'
-    s[0xD1] = base.pLu | base.pp; // 'Ñ'
-    s[0xD2] = base.pLu | base.pp; // 'Ò'
-    s[0xD3] = base.pLu | base.pp; // 'Ó'
-    s[0xD4] = base.pLu | base.pp; // 'Ô'
-    s[0xD5] = base.pLu | base.pp; // 'Õ'
-    s[0xD6] = base.pLu | base.pp; // 'Ö'
-    s[0xD7] = base.pS | base.pp; // '×'
-    s[0xD8] = base.pLu | base.pp; // 'Ø'
-    s[0xD9] = base.pLu | base.pp; // 'Ù'
-    s[0xDA] = base.pLu | base.pp; // 'Ú'
-    s[0xDB] = base.pLu | base.pp; // 'Û'
-    s[0xDC] = base.pLu | base.pp; // 'Ü'
-    s[0xDD] = base.pLu | base.pp; // 'Ý'
-    s[0xDE] = base.pLu | base.pp; // 'Þ'
-    s[0xDF] = base.pLl | base.pp; // 'ß'
-    s[0xE0] = base.pLl | base.pp; // 'à'
-    s[0xE1] = base.pLl | base.pp; // 'á'
-    s[0xE2] = base.pLl | base.pp; // 'â'
-    s[0xE3] = base.pLl | base.pp; // 'ã'
-    s[0xE4] = base.pLl | base.pp; // 'ä'
-    s[0xE5] = base.pLl | base.pp; // 'å'
-    s[0xE6] = base.pLl | base.pp; // 'æ'
-    s[0xE7] = base.pLl | base.pp; // 'ç'
-    s[0xE8] = base.pLl | base.pp; // 'è'
-    s[0xE9] = base.pLl | base.pp; // 'é'
-    s[0xEA] = base.pLl | base.pp; // 'ê'
-    s[0xEB] = base.pLl | base.pp; // 'ë'
-    s[0xEC] = base.pLl | base.pp; // 'ì'
-    s[0xED] = base.pLl | base.pp; // 'í'
-    s[0xEE] = base.pLl | base.pp; // 'î'
-    s[0xEF] = base.pLl | base.pp; // 'ï'
-    s[0xF0] = base.pLl | base.pp; // 'ð'
-    s[0xF1] = base.pLl | base.pp; // 'ñ'
-    s[0xF2] = base.pLl | base.pp; // 'ò'
-    s[0xF3] = base.pLl | base.pp; // 'ó'
-    s[0xF4] = base.pLl | base.pp; // 'ô'
-    s[0xF5] = base.pLl | base.pp; // 'õ'
-    s[0xF6] = base.pLl | base.pp; // 'ö'
-    s[0xF7] = base.pS | base.pp; // '÷'
-    s[0xF8] = base.pLl | base.pp; // 'ø'
-    s[0xF9] = base.pLl | base.pp; // 'ù'
-    s[0xFA] = base.pLl | base.pp; // 'ú'
-    s[0xFB] = base.pLl | base.pp; // 'û'
-    s[0xFC] = base.pLl | base.pp; // 'ü'
-    s[0xFD] = base.pLl | base.pp; // 'ý'
-    s[0xFE] = base.pLl | base.pp; // 'þ'
-    s[0xFF] = base.pLl | base.pp; // 'ÿ'
+    s[0xAE] = pS | pp; // '®'
+    s[0xAF] = pS | pp; // '¯'
+    s[0xB0] = pS | pp; // '°'
+    s[0xB1] = pS | pp; // '±'
+    s[0xB2] = pN | pp; // '²'
+    s[0xB3] = pN | pp; // '³'
+    s[0xB4] = pS | pp; // '´'
+    s[0xB5] = pLl | pp; // 'µ'
+    s[0xB6] = pP | pp; // '¶'
+    s[0xB7] = pP | pp; // '·'
+    s[0xB8] = pS | pp; // '¸'
+    s[0xB9] = pN | pp; // '¹'
+    s[0xBA] = pLo | pp; // 'º'
+    s[0xBB] = pP | pp; // '»'
+    s[0xBC] = pN | pp; // '¼'
+    s[0xBD] = pN | pp; // '½'
+    s[0xBE] = pN | pp; // '¾'
+    s[0xBF] = pP | pp; // '¿'
+    s[0xC0] = pLu | pp; // 'À'
+    s[0xC1] = pLu | pp; // 'Á'
+    s[0xC2] = pLu | pp; // 'Â'
+    s[0xC3] = pLu | pp; // 'Ã'
+    s[0xC4] = pLu | pp; // 'Ä'
+    s[0xC5] = pLu | pp; // 'Å'
+    s[0xC6] = pLu | pp; // 'Æ'
+    s[0xC7] = pLu | pp; // 'Ç'
+    s[0xC8] = pLu | pp; // 'È'
+    s[0xC9] = pLu | pp; // 'É'
+    s[0xCA] = pLu | pp; // 'Ê'
+    s[0xCB] = pLu | pp; // 'Ë'
+    s[0xCC] = pLu | pp; // 'Ì'
+    s[0xCD] = pLu | pp; // 'Í'
+    s[0xCE] = pLu | pp; // 'Î'
+    s[0xCF] = pLu | pp; // 'Ï'
+    s[0xD0] = pLu | pp; // 'Ð'
+    s[0xD1] = pLu | pp; // 'Ñ'
+    s[0xD2] = pLu | pp; // 'Ò'
+    s[0xD3] = pLu | pp; // 'Ó'
+    s[0xD4] = pLu | pp; // 'Ô'
+    s[0xD5] = pLu | pp; // 'Õ'
+    s[0xD6] = pLu | pp; // 'Ö'
+    s[0xD7] = pS | pp; // '×'
+    s[0xD8] = pLu | pp; // 'Ø'
+    s[0xD9] = pLu | pp; // 'Ù'
+    s[0xDA] = pLu | pp; // 'Ú'
+    s[0xDB] = pLu | pp; // 'Û'
+    s[0xDC] = pLu | pp; // 'Ü'
+    s[0xDD] = pLu | pp; // 'Ý'
+    s[0xDE] = pLu | pp; // 'Þ'
+    s[0xDF] = pLl | pp; // 'ß'
+    s[0xE0] = pLl | pp; // 'à'
+    s[0xE1] = pLl | pp; // 'á'
+    s[0xE2] = pLl | pp; // 'â'
+    s[0xE3] = pLl | pp; // 'ã'
+    s[0xE4] = pLl | pp; // 'ä'
+    s[0xE5] = pLl | pp; // 'å'
+    s[0xE6] = pLl | pp; // 'æ'
+    s[0xE7] = pLl | pp; // 'ç'
+    s[0xE8] = pLl | pp; // 'è'
+    s[0xE9] = pLl | pp; // 'é'
+    s[0xEA] = pLl | pp; // 'ê'
+    s[0xEB] = pLl | pp; // 'ë'
+    s[0xEC] = pLl | pp; // 'ì'
+    s[0xED] = pLl | pp; // 'í'
+    s[0xEE] = pLl | pp; // 'î'
+    s[0xEF] = pLl | pp; // 'ï'
+    s[0xF0] = pLl | pp; // 'ð'
+    s[0xF1] = pLl | pp; // 'ñ'
+    s[0xF2] = pLl | pp; // 'ò'
+    s[0xF3] = pLl | pp; // 'ó'
+    s[0xF4] = pLl | pp; // 'ô'
+    s[0xF5] = pLl | pp; // 'õ'
+    s[0xF6] = pLl | pp; // 'ö'
+    s[0xF7] = pS | pp; // '÷'
+    s[0xF8] = pLl | pp; // 'ø'
+    s[0xF9] = pLl | pp; // 'ù'
+    s[0xFA] = pLl | pp; // 'ú'
+    s[0xFB] = pLl | pp; // 'û'
+    s[0xFC] = pLl | pp; // 'ü'
+    s[0xFD] = pLl | pp; // 'ý'
+    s[0xFE] = pLl | pp; // 'þ'
+    s[0xFF] = pLl | pp; // 'ÿ'
     break :init s;
 };
 
@@ -8350,95 +8425,95 @@ pub const asciiFold = []u16{
     0x007F,
 };
 
-pub const caseOrbit = []base.FoldPair{
-    base.FoldPair.init(0x004B, 0x006B),
-    base.FoldPair.init(0x0053, 0x0073),
-    base.FoldPair.init(0x006B, 0x212A),
-    base.FoldPair.init(0x0073, 0x017F),
-    base.FoldPair.init(0x00B5, 0x039C),
-    base.FoldPair.init(0x00C5, 0x00E5),
-    base.FoldPair.init(0x00DF, 0x1E9E),
-    base.FoldPair.init(0x00E5, 0x212B),
-    base.FoldPair.init(0x0130, 0x0130),
-    base.FoldPair.init(0x0131, 0x0131),
-    base.FoldPair.init(0x017F, 0x0053),
-    base.FoldPair.init(0x01C4, 0x01C5),
-    base.FoldPair.init(0x01C5, 0x01C6),
-    base.FoldPair.init(0x01C6, 0x01C4),
-    base.FoldPair.init(0x01C7, 0x01C8),
-    base.FoldPair.init(0x01C8, 0x01C9),
-    base.FoldPair.init(0x01C9, 0x01C7),
-    base.FoldPair.init(0x01CA, 0x01CB),
-    base.FoldPair.init(0x01CB, 0x01CC),
-    base.FoldPair.init(0x01CC, 0x01CA),
-    base.FoldPair.init(0x01F1, 0x01F2),
-    base.FoldPair.init(0x01F2, 0x01F3),
-    base.FoldPair.init(0x01F3, 0x01F1),
-    base.FoldPair.init(0x0345, 0x0399),
-    base.FoldPair.init(0x0392, 0x03B2),
-    base.FoldPair.init(0x0395, 0x03B5),
-    base.FoldPair.init(0x0398, 0x03B8),
-    base.FoldPair.init(0x0399, 0x03B9),
-    base.FoldPair.init(0x039A, 0x03BA),
-    base.FoldPair.init(0x039C, 0x03BC),
-    base.FoldPair.init(0x03A0, 0x03C0),
-    base.FoldPair.init(0x03A1, 0x03C1),
-    base.FoldPair.init(0x03A3, 0x03C2),
-    base.FoldPair.init(0x03A6, 0x03C6),
-    base.FoldPair.init(0x03A9, 0x03C9),
-    base.FoldPair.init(0x03B2, 0x03D0),
-    base.FoldPair.init(0x03B5, 0x03F5),
-    base.FoldPair.init(0x03B8, 0x03D1),
-    base.FoldPair.init(0x03B9, 0x1FBE),
-    base.FoldPair.init(0x03BA, 0x03F0),
-    base.FoldPair.init(0x03BC, 0x00B5),
-    base.FoldPair.init(0x03C0, 0x03D6),
-    base.FoldPair.init(0x03C1, 0x03F1),
-    base.FoldPair.init(0x03C2, 0x03C3),
-    base.FoldPair.init(0x03C3, 0x03A3),
-    base.FoldPair.init(0x03C6, 0x03D5),
-    base.FoldPair.init(0x03C9, 0x2126),
-    base.FoldPair.init(0x03D0, 0x0392),
-    base.FoldPair.init(0x03D1, 0x03F4),
-    base.FoldPair.init(0x03D5, 0x03A6),
-    base.FoldPair.init(0x03D6, 0x03A0),
-    base.FoldPair.init(0x03F0, 0x039A),
-    base.FoldPair.init(0x03F1, 0x03A1),
-    base.FoldPair.init(0x03F4, 0x0398),
-    base.FoldPair.init(0x03F5, 0x0395),
-    base.FoldPair.init(0x0412, 0x0432),
-    base.FoldPair.init(0x0414, 0x0434),
-    base.FoldPair.init(0x041E, 0x043E),
-    base.FoldPair.init(0x0421, 0x0441),
-    base.FoldPair.init(0x0422, 0x0442),
-    base.FoldPair.init(0x042A, 0x044A),
-    base.FoldPair.init(0x0432, 0x1C80),
-    base.FoldPair.init(0x0434, 0x1C81),
-    base.FoldPair.init(0x043E, 0x1C82),
-    base.FoldPair.init(0x0441, 0x1C83),
-    base.FoldPair.init(0x0442, 0x1C84),
-    base.FoldPair.init(0x044A, 0x1C86),
-    base.FoldPair.init(0x0462, 0x0463),
-    base.FoldPair.init(0x0463, 0x1C87),
-    base.FoldPair.init(0x1C80, 0x0412),
-    base.FoldPair.init(0x1C81, 0x0414),
-    base.FoldPair.init(0x1C82, 0x041E),
-    base.FoldPair.init(0x1C83, 0x0421),
-    base.FoldPair.init(0x1C84, 0x1C85),
-    base.FoldPair.init(0x1C85, 0x0422),
-    base.FoldPair.init(0x1C86, 0x042A),
-    base.FoldPair.init(0x1C87, 0x0462),
-    base.FoldPair.init(0x1C88, 0xA64A),
-    base.FoldPair.init(0x1E60, 0x1E61),
-    base.FoldPair.init(0x1E61, 0x1E9B),
-    base.FoldPair.init(0x1E9B, 0x1E60),
-    base.FoldPair.init(0x1E9E, 0x00DF),
-    base.FoldPair.init(0x1FBE, 0x0345),
-    base.FoldPair.init(0x2126, 0x03A9),
-    base.FoldPair.init(0x212A, 0x004B),
-    base.FoldPair.init(0x212B, 0x00C5),
-    base.FoldPair.init(0xA64A, 0xA64B),
-    base.FoldPair.init(0xA64B, 0x1C88),
+pub const caseOrbit = []FoldPair{
+    FoldPair.init(0x004B, 0x006B),
+    FoldPair.init(0x0053, 0x0073),
+    FoldPair.init(0x006B, 0x212A),
+    FoldPair.init(0x0073, 0x017F),
+    FoldPair.init(0x00B5, 0x039C),
+    FoldPair.init(0x00C5, 0x00E5),
+    FoldPair.init(0x00DF, 0x1E9E),
+    FoldPair.init(0x00E5, 0x212B),
+    FoldPair.init(0x0130, 0x0130),
+    FoldPair.init(0x0131, 0x0131),
+    FoldPair.init(0x017F, 0x0053),
+    FoldPair.init(0x01C4, 0x01C5),
+    FoldPair.init(0x01C5, 0x01C6),
+    FoldPair.init(0x01C6, 0x01C4),
+    FoldPair.init(0x01C7, 0x01C8),
+    FoldPair.init(0x01C8, 0x01C9),
+    FoldPair.init(0x01C9, 0x01C7),
+    FoldPair.init(0x01CA, 0x01CB),
+    FoldPair.init(0x01CB, 0x01CC),
+    FoldPair.init(0x01CC, 0x01CA),
+    FoldPair.init(0x01F1, 0x01F2),
+    FoldPair.init(0x01F2, 0x01F3),
+    FoldPair.init(0x01F3, 0x01F1),
+    FoldPair.init(0x0345, 0x0399),
+    FoldPair.init(0x0392, 0x03B2),
+    FoldPair.init(0x0395, 0x03B5),
+    FoldPair.init(0x0398, 0x03B8),
+    FoldPair.init(0x0399, 0x03B9),
+    FoldPair.init(0x039A, 0x03BA),
+    FoldPair.init(0x039C, 0x03BC),
+    FoldPair.init(0x03A0, 0x03C0),
+    FoldPair.init(0x03A1, 0x03C1),
+    FoldPair.init(0x03A3, 0x03C2),
+    FoldPair.init(0x03A6, 0x03C6),
+    FoldPair.init(0x03A9, 0x03C9),
+    FoldPair.init(0x03B2, 0x03D0),
+    FoldPair.init(0x03B5, 0x03F5),
+    FoldPair.init(0x03B8, 0x03D1),
+    FoldPair.init(0x03B9, 0x1FBE),
+    FoldPair.init(0x03BA, 0x03F0),
+    FoldPair.init(0x03BC, 0x00B5),
+    FoldPair.init(0x03C0, 0x03D6),
+    FoldPair.init(0x03C1, 0x03F1),
+    FoldPair.init(0x03C2, 0x03C3),
+    FoldPair.init(0x03C3, 0x03A3),
+    FoldPair.init(0x03C6, 0x03D5),
+    FoldPair.init(0x03C9, 0x2126),
+    FoldPair.init(0x03D0, 0x0392),
+    FoldPair.init(0x03D1, 0x03F4),
+    FoldPair.init(0x03D5, 0x03A6),
+    FoldPair.init(0x03D6, 0x03A0),
+    FoldPair.init(0x03F0, 0x039A),
+    FoldPair.init(0x03F1, 0x03A1),
+    FoldPair.init(0x03F4, 0x0398),
+    FoldPair.init(0x03F5, 0x0395),
+    FoldPair.init(0x0412, 0x0432),
+    FoldPair.init(0x0414, 0x0434),
+    FoldPair.init(0x041E, 0x043E),
+    FoldPair.init(0x0421, 0x0441),
+    FoldPair.init(0x0422, 0x0442),
+    FoldPair.init(0x042A, 0x044A),
+    FoldPair.init(0x0432, 0x1C80),
+    FoldPair.init(0x0434, 0x1C81),
+    FoldPair.init(0x043E, 0x1C82),
+    FoldPair.init(0x0441, 0x1C83),
+    FoldPair.init(0x0442, 0x1C84),
+    FoldPair.init(0x044A, 0x1C86),
+    FoldPair.init(0x0462, 0x0463),
+    FoldPair.init(0x0463, 0x1C87),
+    FoldPair.init(0x1C80, 0x0412),
+    FoldPair.init(0x1C81, 0x0414),
+    FoldPair.init(0x1C82, 0x041E),
+    FoldPair.init(0x1C83, 0x0421),
+    FoldPair.init(0x1C84, 0x1C85),
+    FoldPair.init(0x1C85, 0x0422),
+    FoldPair.init(0x1C86, 0x042A),
+    FoldPair.init(0x1C87, 0x0462),
+    FoldPair.init(0x1C88, 0xA64A),
+    FoldPair.init(0x1E60, 0x1E61),
+    FoldPair.init(0x1E61, 0x1E9B),
+    FoldPair.init(0x1E9B, 0x1E60),
+    FoldPair.init(0x1E9E, 0x00DF),
+    FoldPair.init(0x1FBE, 0x0345),
+    FoldPair.init(0x2126, 0x03A9),
+    FoldPair.init(0x212A, 0x004B),
+    FoldPair.init(0x212B, 0x00C5),
+    FoldPair.init(0xA64A, 0xA64B),
+    FoldPair.init(0xA64B, 0x1C88),
 };
 
 // FoldCategory maps a category name to a table of

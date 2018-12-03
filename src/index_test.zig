@@ -1,4 +1,3 @@
-const base = @import("base.zig");
 const tables = @import("tables.zig");
 const unicode = @import("index.zig");
 const t = @import("./util/index.zig");
@@ -71,10 +70,10 @@ test "isUpper" {
 }
 
 const caseT = struct {
-    case: base.Case,
+    case: tables.Case,
     in: i32,
     out: i32,
-    fn init(case: base.Case, in: i32, out: i32) caseT {
+    fn init(case: tables.Case, in: i32, out: i32) caseT {
         return caseT{ .case = case, .in = in, .out = out };
     }
 };
@@ -82,118 +81,118 @@ const caseT = struct {
 const case_test = []caseT{
 
     // ASCII (special-cased so test carefully)
-    caseT.init(base.Case.Upper, '\n', '\n'),
-    caseT.init(base.Case.Upper, 'a', 'A'),
-    caseT.init(base.Case.Upper, 'A', 'A'),
-    caseT.init(base.Case.Upper, '7', '7'),
-    caseT.init(base.Case.Lower, '\n', '\n'),
-    caseT.init(base.Case.Lower, 'a', 'a'),
-    caseT.init(base.Case.Lower, 'A', 'a'),
-    caseT.init(base.Case.Lower, '7', '7'),
-    caseT.init(base.Case.Title, '\n', '\n'),
-    caseT.init(base.Case.Title, 'a', 'A'),
-    caseT.init(base.Case.Title, 'A', 'A'),
-    caseT.init(base.Case.Title, '7', '7'),
+    caseT.init(tables.Case.Upper, '\n', '\n'),
+    caseT.init(tables.Case.Upper, 'a', 'A'),
+    caseT.init(tables.Case.Upper, 'A', 'A'),
+    caseT.init(tables.Case.Upper, '7', '7'),
+    caseT.init(tables.Case.Lower, '\n', '\n'),
+    caseT.init(tables.Case.Lower, 'a', 'a'),
+    caseT.init(tables.Case.Lower, 'A', 'a'),
+    caseT.init(tables.Case.Lower, '7', '7'),
+    caseT.init(tables.Case.Title, '\n', '\n'),
+    caseT.init(tables.Case.Title, 'a', 'A'),
+    caseT.init(tables.Case.Title, 'A', 'A'),
+    caseT.init(tables.Case.Title, '7', '7'),
     // Latin-1: easy to read the tests!
-    caseT.init(base.Case.Upper, 0x80, 0x80),
-    // caseT.init(base.Case.Upper, 'Å', 'Å'),
-    // caseT.init(base.Case.Upper, 'å', 'Å'),
-    caseT.init(base.Case.Lower, 0x80, 0x80),
-    // caseT.init(base.Case.Lower, 'Å', 'å'),
-    // caseT.init(base.Case.Lower, 'å', 'å'),
-    caseT.init(base.Case.Title, 0x80, 0x80),
-    // caseT.init(base.Case.Title, 'Å', 'Å'),
-    // caseT.init(base.Case.Title, 'å', 'Å'),
+    caseT.init(tables.Case.Upper, 0x80, 0x80),
+    // caseT.init(tables.Case.Upper, 'Å', 'Å'),
+    // caseT.init(tables.Case.Upper, 'å', 'Å'),
+    caseT.init(tables.Case.Lower, 0x80, 0x80),
+    // caseT.init(tables.Case.Lower, 'Å', 'å'),
+    // caseT.init(tables.Case.Lower, 'å', 'å'),
+    caseT.init(tables.Case.Title, 0x80, 0x80),
+    // caseT.init(tables.Case.Title, 'Å', 'Å'),
+    // caseT.init(tables.Case.Title, 'å', 'Å'),
 
     // 0131;LATIN SMALL LETTER DOTLESS I;Ll;0;L;;;;;N;;;0049;;0049
-    caseT.init(base.Case.Upper, 0x0131, 'I'),
-    caseT.init(base.Case.Lower, 0x0131, 0x0131),
-    caseT.init(base.Case.Title, 0x0131, 'I'),
+    caseT.init(tables.Case.Upper, 0x0131, 'I'),
+    caseT.init(tables.Case.Lower, 0x0131, 0x0131),
+    caseT.init(tables.Case.Title, 0x0131, 'I'),
 
     // 0133;LATIN SMALL LIGATURE IJ;Ll;0;L;<compat> 0069 006A;;;;N;LATIN SMALL LETTER I J;;0132;;0132
-    caseT.init(base.Case.Upper, 0x0133, 0x0132),
-    caseT.init(base.Case.Lower, 0x0133, 0x0133),
-    caseT.init(base.Case.Title, 0x0133, 0x0132),
+    caseT.init(tables.Case.Upper, 0x0133, 0x0132),
+    caseT.init(tables.Case.Lower, 0x0133, 0x0133),
+    caseT.init(tables.Case.Title, 0x0133, 0x0132),
 
     // 212A;KELVIN SIGN;Lu;0;L;004B;;;;N;DEGREES KELVIN;;;006B;
-    caseT.init(base.Case.Upper, 0x212A, 0x212A),
-    caseT.init(base.Case.Lower, 0x212A, 'k'),
-    caseT.init(base.Case.Title, 0x212A, 0x212A),
+    caseT.init(tables.Case.Upper, 0x212A, 0x212A),
+    caseT.init(tables.Case.Lower, 0x212A, 'k'),
+    caseT.init(tables.Case.Title, 0x212A, 0x212A),
 
     // From an UpperLower sequence
     // A640;CYRILLIC CAPITAL LETTER ZEMLYA;Lu;0;L;;;;;N;;;;A641;
-    caseT.init(base.Case.Upper, 0xA640, 0xA640),
-    caseT.init(base.Case.Lower, 0xA640, 0xA641),
-    caseT.init(base.Case.Title, 0xA640, 0xA640),
+    caseT.init(tables.Case.Upper, 0xA640, 0xA640),
+    caseT.init(tables.Case.Lower, 0xA640, 0xA641),
+    caseT.init(tables.Case.Title, 0xA640, 0xA640),
     // A641;CYRILLIC SMALL LETTER ZEMLYA;Ll;0;L;;;;;N;;;A640;;A640
-    caseT.init(base.Case.Upper, 0xA641, 0xA640),
-    caseT.init(base.Case.Lower, 0xA641, 0xA641),
-    caseT.init(base.Case.Title, 0xA641, 0xA640),
+    caseT.init(tables.Case.Upper, 0xA641, 0xA640),
+    caseT.init(tables.Case.Lower, 0xA641, 0xA641),
+    caseT.init(tables.Case.Title, 0xA641, 0xA640),
     // A64E;CYRILLIC CAPITAL LETTER NEUTRAL YER;Lu;0;L;;;;;N;;;;A64F;
-    caseT.init(base.Case.Upper, 0xA64E, 0xA64E),
-    caseT.init(base.Case.Lower, 0xA64E, 0xA64F),
-    caseT.init(base.Case.Title, 0xA64E, 0xA64E),
+    caseT.init(tables.Case.Upper, 0xA64E, 0xA64E),
+    caseT.init(tables.Case.Lower, 0xA64E, 0xA64F),
+    caseT.init(tables.Case.Title, 0xA64E, 0xA64E),
     // A65F;CYRILLIC SMALL LETTER YN;Ll;0;L;;;;;N;;;A65E;;A65E
-    caseT.init(base.Case.Upper, 0xA65F, 0xA65E),
-    caseT.init(base.Case.Lower, 0xA65F, 0xA65F),
-    caseT.init(base.Case.Title, 0xA65F, 0xA65E),
+    caseT.init(tables.Case.Upper, 0xA65F, 0xA65E),
+    caseT.init(tables.Case.Lower, 0xA65F, 0xA65F),
+    caseT.init(tables.Case.Title, 0xA65F, 0xA65E),
 
     // From another UpperLower sequence
     // 0139;LATIN CAPITAL LETTER L WITH ACUTE;Lu;0;L;004C 0301;;;;N;LATIN CAPITAL LETTER L ACUTE;;;013A;
-    caseT.init(base.Case.Upper, 0x0139, 0x0139),
-    caseT.init(base.Case.Lower, 0x0139, 0x013A),
-    caseT.init(base.Case.Title, 0x0139, 0x0139),
+    caseT.init(tables.Case.Upper, 0x0139, 0x0139),
+    caseT.init(tables.Case.Lower, 0x0139, 0x013A),
+    caseT.init(tables.Case.Title, 0x0139, 0x0139),
     // 013F;LATIN CAPITAL LETTER L WITH MIDDLE DOT;Lu;0;L;<compat> 004C 00B7;;;;N;;;;0140;
-    caseT.init(base.Case.Upper, 0x013f, 0x013f),
-    caseT.init(base.Case.Lower, 0x013f, 0x0140),
-    caseT.init(base.Case.Title, 0x013f, 0x013f),
+    caseT.init(tables.Case.Upper, 0x013f, 0x013f),
+    caseT.init(tables.Case.Lower, 0x013f, 0x0140),
+    caseT.init(tables.Case.Title, 0x013f, 0x013f),
     // 0148;LATIN SMALL LETTER N WITH CARON;Ll;0;L;006E 030C;;;;N;LATIN SMALL LETTER N HACEK;;0147;;0147
-    caseT.init(base.Case.Upper, 0x0148, 0x0147),
-    caseT.init(base.Case.Lower, 0x0148, 0x0148),
-    caseT.init(base.Case.Title, 0x0148, 0x0147),
+    caseT.init(tables.Case.Upper, 0x0148, 0x0147),
+    caseT.init(tables.Case.Lower, 0x0148, 0x0148),
+    caseT.init(tables.Case.Title, 0x0148, 0x0147),
 
-    // base.Case.Lower lower than base.Case.Upper.
+    // tables.Case.Lower lower than tables.Case.Upper.
     // AB78;CHEROKEE SMALL LETTER GE;Ll;0;L;;;;;N;;;13A8;;13A8
-    caseT.init(base.Case.Upper, 0xab78, 0x13a8),
-    caseT.init(base.Case.Lower, 0xab78, 0xab78),
-    caseT.init(base.Case.Title, 0xab78, 0x13a8),
-    caseT.init(base.Case.Upper, 0x13a8, 0x13a8),
-    caseT.init(base.Case.Lower, 0x13a8, 0xab78),
-    caseT.init(base.Case.Title, 0x13a8, 0x13a8),
+    caseT.init(tables.Case.Upper, 0xab78, 0x13a8),
+    caseT.init(tables.Case.Lower, 0xab78, 0xab78),
+    caseT.init(tables.Case.Title, 0xab78, 0x13a8),
+    caseT.init(tables.Case.Upper, 0x13a8, 0x13a8),
+    caseT.init(tables.Case.Lower, 0x13a8, 0xab78),
+    caseT.init(tables.Case.Title, 0x13a8, 0x13a8),
 
     // Last block in the 5.1.0 table
     // 10400;DESERET CAPITAL LETTER LONG I;Lu;0;L;;;;;N;;;;10428;
-    caseT.init(base.Case.Upper, 0x10400, 0x10400),
-    caseT.init(base.Case.Lower, 0x10400, 0x10428),
-    caseT.init(base.Case.Title, 0x10400, 0x10400),
+    caseT.init(tables.Case.Upper, 0x10400, 0x10400),
+    caseT.init(tables.Case.Lower, 0x10400, 0x10428),
+    caseT.init(tables.Case.Title, 0x10400, 0x10400),
     // 10427;DESERET CAPITAL LETTER EW;Lu;0;L;;;;;N;;;;1044F;
-    caseT.init(base.Case.Upper, 0x10427, 0x10427),
-    caseT.init(base.Case.Lower, 0x10427, 0x1044F),
-    caseT.init(base.Case.Title, 0x10427, 0x10427),
+    caseT.init(tables.Case.Upper, 0x10427, 0x10427),
+    caseT.init(tables.Case.Lower, 0x10427, 0x1044F),
+    caseT.init(tables.Case.Title, 0x10427, 0x10427),
     // 10428;DESERET SMALL LETTER LONG I;Ll;0;L;;;;;N;;;10400;;10400
-    caseT.init(base.Case.Upper, 0x10428, 0x10400),
-    caseT.init(base.Case.Lower, 0x10428, 0x10428),
-    caseT.init(base.Case.Title, 0x10428, 0x10400),
+    caseT.init(tables.Case.Upper, 0x10428, 0x10400),
+    caseT.init(tables.Case.Lower, 0x10428, 0x10428),
+    caseT.init(tables.Case.Title, 0x10428, 0x10400),
     // 1044F;DESERET SMALL LETTER EW;Ll;0;L;;;;;N;;;10427;;10427
-    caseT.init(base.Case.Upper, 0x1044F, 0x10427),
-    caseT.init(base.Case.Lower, 0x1044F, 0x1044F),
-    caseT.init(base.Case.Title, 0x1044F, 0x10427),
+    caseT.init(tables.Case.Upper, 0x1044F, 0x10427),
+    caseT.init(tables.Case.Lower, 0x1044F, 0x1044F),
+    caseT.init(tables.Case.Title, 0x1044F, 0x10427),
 
     // First one not in the 5.1.0 table
     // 10450;SHAVIAN LETTER PEEP;Lo;0;L;;;;;N;;;;;
-    caseT.init(base.Case.Upper, 0x10450, 0x10450),
-    caseT.init(base.Case.Lower, 0x10450, 0x10450),
-    caseT.init(base.Case.Title, 0x10450, 0x10450),
+    caseT.init(tables.Case.Upper, 0x10450, 0x10450),
+    caseT.init(tables.Case.Lower, 0x10450, 0x10450),
+    caseT.init(tables.Case.Title, 0x10450, 0x10450),
 
     // Non-letters with case.
-    caseT.init(base.Case.Lower, 0x2161, 0x2171),
-    caseT.init(base.Case.Upper, 0x0345, 0x0399),
+    caseT.init(tables.Case.Lower, 0x2161, 0x2171),
+    caseT.init(tables.Case.Upper, 0x0345, 0x0399),
 };
 
 test "toUpper" {
     for (case_test) |c, idx| {
         switch (c.case) {
-            base.Case.Upper => {
+            tables.Case.Upper => {
                 const r = unicode.toUpper(c.in);
                 if (r != c.out) {
                     try t.terrorf("expected {} got {}\n", c.out, r);
@@ -207,7 +206,7 @@ test "toUpper" {
 test "toLower" {
     for (case_test) |c, idx| {
         switch (c.case) {
-            base.Case.Lower => {
+            tables.Case.Lower => {
                 const r = unicode.toLower(c.in);
                 if (r != c.out) {
                     try t.terrorf("expected {} got {}\n", c.out, r);
@@ -221,7 +220,7 @@ test "toLower" {
 test "toLower" {
     for (case_test) |c, idx| {
         switch (c.case) {
-            base.Case.Title => {
+            tables.Case.Title => {
                 const r = unicode.toTitle(c.in);
                 if (r != c.out) {
                     try t.terrorf("expected {} got {}\n", c.out, r);
@@ -243,7 +242,7 @@ test "to" {
 
 test "isControlLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isControl(i);
         var want: bool = false;
         if (0x00 <= i and i <= 0x1F) {
@@ -260,7 +259,7 @@ test "isControlLatin1" {
 
 test "isLetterLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isLetter(i);
         const want = unicode.is(tables.Letter, i);
         if (got != want) {
@@ -272,7 +271,7 @@ test "isLetterLatin1" {
 
 test "isUpperLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isUpper(i);
         const want = unicode.is(tables.Upper, i);
         if (got != want) {
@@ -284,7 +283,7 @@ test "isUpperLatin1" {
 
 test "isLowerLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isLower(i);
         const want = unicode.is(tables.Lower, i);
         if (got != want) {
@@ -296,7 +295,7 @@ test "isLowerLatin1" {
 
 test "isNumberLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isNumber(i);
         const want = unicode.is(tables.Number, i);
         if (got != want) {
@@ -308,7 +307,7 @@ test "isNumberLatin1" {
 
 test "isPrintLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isPrint(i);
         var want = unicode.in(i, unicode.print_ranges[0..]);
         if (i == ' ') {
@@ -323,7 +322,7 @@ test "isPrintLatin1" {
 
 test "isGraphicLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isGraphic(i);
         var want = unicode.in(i, unicode.graphic_ranges[0..]);
         if (got != want) {
@@ -335,7 +334,7 @@ test "isGraphicLatin1" {
 
 test "isPunctLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isPunct(i);
         const want = unicode.is(tables.Punct, i);
         if (got != want) {
@@ -347,7 +346,7 @@ test "isPunctLatin1" {
 
 test "isSpaceLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isSpace(i);
         const want = unicode.is(tables.White_Space, i);
         if (got != want) {
@@ -359,7 +358,7 @@ test "isSpaceLatin1" {
 
 test "isSymbolLatin1" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isSymbol(i);
         const want = unicode.is(tables.Symbol, i);
         if (got != want) {
@@ -479,7 +478,7 @@ test "isDigit" {
 
 test "DigitOptimization" {
     var i: i32 = 0;
-    while (i <= base.max_latin1) {
+    while (i <= tables.max_latin1) {
         const got = unicode.isDigit(i);
         const want = unicode.is(tables.Digit, i);
         if (got != want) {
