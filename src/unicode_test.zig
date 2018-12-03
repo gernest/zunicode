@@ -1,8 +1,8 @@
 const tables = @import("tables.zig");
-const unicode = @import("index.zig");
-const t = @import("./util/index.zig");
+const unicode = @import("unicode.zig");
 const warn = @import("std").debug.warn;
 
+const test_failed = error.TestFailed;
 const notletterTest = []i32{
     0x20,
     0x35,
@@ -54,17 +54,20 @@ const notupperTest = []i32{
 test "isUpper" {
     for (upper_test) |r, i| {
         if (!unicode.isUpper(r)) {
-            try t.terrorf("\nexpected {} to be upper i={}\n", r, i);
+            warn("\nexpected {} to be upper i={}\n", r, i);
+            return test_failed;
         }
     }
     for (notupperTest) |r, i| {
         if (unicode.isUpper(r)) {
-            try t.terrorf("\nexpected {} not to be upper i={}\n", r, i);
+            warn("\nexpected {} not to be upper i={}\n", r, i);
+            return test_failed;
         }
     }
     for (notletterTest) |r, i| {
         if (unicode.isUpper(r)) {
-            try t.terrorf("\nexpected {} not to be upper i={}\n", r, i);
+            warn("\nexpected {} not to be upper i={}\n", r, i);
+            return test_failed;
         }
     }
 }
@@ -195,7 +198,8 @@ test "toUpper" {
             tables.Case.Upper => {
                 const r = unicode.toUpper(c.in);
                 if (r != c.out) {
-                    try t.terrorf("expected {} got {}\n", c.out, r);
+                    warn("expected {} got {}\n", c.out, r);
+                    return test_failed;
                 }
             },
             else => {},
@@ -209,7 +213,8 @@ test "toLower" {
             tables.Case.Lower => {
                 const r = unicode.toLower(c.in);
                 if (r != c.out) {
-                    try t.terrorf("expected {} got {}\n", c.out, r);
+                    warn("expected {} got {}\n", c.out, r);
+                    return test_failed;
                 }
             },
             else => {},
@@ -223,7 +228,8 @@ test "toLower" {
             tables.Case.Title => {
                 const r = unicode.toTitle(c.in);
                 if (r != c.out) {
-                    try t.terrorf("expected {} got {}\n", c.out, r);
+                    warn("expected {} got {}\n", c.out, r);
+                    return test_failed;
                 }
             },
             else => {},
@@ -235,7 +241,8 @@ test "to" {
     for (case_test) |c| {
         const r = unicode.to(c.case, c.in);
         if (r != c.out) {
-            try t.terrorf("expected {} got {}\n", c.out, r);
+            warn("expected {} got {}\n", c.out, r);
+            return test_failed;
         }
     }
 }
@@ -251,7 +258,8 @@ test "isControlLatin1" {
             want = true;
         }
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -263,7 +271,8 @@ test "isLetterLatin1" {
         const got = unicode.isLetter(i);
         const want = unicode.is(tables.Letter, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -275,7 +284,8 @@ test "isUpperLatin1" {
         const got = unicode.isUpper(i);
         const want = unicode.is(tables.Upper, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -287,7 +297,8 @@ test "isLowerLatin1" {
         const got = unicode.isLower(i);
         const want = unicode.is(tables.Lower, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -299,7 +310,8 @@ test "isNumberLatin1" {
         const got = unicode.isNumber(i);
         const want = unicode.is(tables.Number, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -314,7 +326,8 @@ test "isPrintLatin1" {
             want = true;
         }
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -326,7 +339,8 @@ test "isGraphicLatin1" {
         const got = unicode.isGraphic(i);
         var want = unicode.in(i, unicode.graphic_ranges[0..]);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -338,7 +352,8 @@ test "isPunctLatin1" {
         const got = unicode.isPunct(i);
         const want = unicode.is(tables.Punct, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -350,7 +365,8 @@ test "isSpaceLatin1" {
         const got = unicode.isSpace(i);
         const want = unicode.is(tables.White_Space, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -362,7 +378,8 @@ test "isSymbolLatin1" {
         const got = unicode.isSymbol(i);
         const want = unicode.is(tables.Symbol, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
@@ -465,13 +482,15 @@ const test_letter = []i32{
 test "isDigit" {
     for (test_digit) |r| {
         if (!unicode.isDigit(r)) {
-            try t.terrorf("expected {} to be a digit\n", r);
+            warn("expected {} to be a digit\n", r);
+            return test_failed;
         }
     }
 
     for (test_letter) |r| {
         if (unicode.isDigit(r)) {
-            try t.terrorf("expected {} not to be a digit\n", r);
+            warn("expected {} not to be a digit\n", r);
+            return test_failed;
         }
     }
 }
@@ -482,7 +501,8 @@ test "DigitOptimization" {
         const got = unicode.isDigit(i);
         const want = unicode.is(tables.Digit, i);
         if (got != want) {
-            try t.terrorf("{} got {} wanted {}\n", i, got, want);
+            warn("{} got {} wanted {}\n", i, got, want);
+            return test_failed;
         }
         i += 1;
     }
