@@ -1,5 +1,5 @@
-const utf8 = @import("./src/utf8/index.zig");
 const unicode = @import("./src/index.zig");
+const utf8 = unicode.utf8;
 const warn = @import("std").debug.warn;
 
 test "ExampleRuneLen" {
@@ -15,7 +15,7 @@ test "ExampleRuneLen" {
 test "Example_is" {
     const mixed = "\t5Ὂg̀9! ℃ᾭG";
     var iter = utf8.Iterator.init(mixed);
-    var a = []u8.{0} ** 5;
+    var a = []u8{0} ** 5;
     warn("\n");
     while (true) {
         const next = try iter.next();

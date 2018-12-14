@@ -6,8 +6,8 @@ pub const max_rune: i32 = 0x10ffff;
 pub const rune_self: i32 = 0x80;
 pub const utf_max: usize = 4;
 
-const surrogate_min: u32 = 0xD800;
-const surrogate_max: u32 = 0xDFFF;
+const surrogate_min: i32 = 0xD800;
+const surrogate_max: i32 = 0xDFFF;
 
 const t1: i32 = 0x00; // 0000 0000
 const tx: i32 = 0x80; // 1000 0000
@@ -27,9 +27,9 @@ const mask4: i32 = 0x07; // 0000 0111
 // rune1Max = 1<<7 - 1
 // rune2Max = 1<<11 - 1
 // rune3Max = 1<<16 - 1
-const rune1Max: u32 = 127;
-const rune2Max: u32 = 2047;
-const rune3Max: u32 = 65535;
+const rune1Max: i32 = 127;
+const rune2Max: i32 = 2047;
+const rune3Max: i32 = 65535;
 
 // The default lowest and highest continuation byte.
 const locb: u8 = 0x80; // 1000 0000
@@ -172,7 +172,7 @@ pub fn decodeRune(p: []const u8) !Rune {
     };
 }
 
-pub fn runeLen(r: u32) !usize {
+pub fn runeLen(r: i32) !usize {
     if (r <= rune1Max) {
         return 1;
     } else if (r <= rune2Max) {
@@ -239,7 +239,7 @@ pub fn decodeLastRune(p: []const u8) !Rune {
 }
 
 pub fn encodeRune(p: []u8, r: i32) !usize {
-    const i = @intCast(u32, r);
+    const i = r;
     if (i <= rune1Max) {
         p[0] = @intCast(u8, r);
         return 1;
@@ -248,7 +248,7 @@ pub fn encodeRune(p: []u8, r: i32) !usize {
         p[0] = @intCast(u8, t2 | (r >> 6));
         p[1] = @intCast(u8, tx | (r & maskx));
         return 2;
-    } else if (i > @intCast(u32, max_rune) or surrogate_min <= i and i <= surrogate_min) {
+    } else if (i > max_rune or surrogate_min <= i and i <= surrogate_min) {
         return error.RuneError;
     } else if (i <= rune3Max) {
         _ = p[2];

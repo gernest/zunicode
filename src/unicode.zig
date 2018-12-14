@@ -100,7 +100,7 @@ pub fn isLower(rune: i32) bool {
 }
 
 // IsTitle reports whether the rune is a title case
-pub fn isTitle(rune: u32) bool {
+pub fn isTitle(rune: i32) bool {
     if (rune <= tables.max_latin1) {
         return false;
     }
