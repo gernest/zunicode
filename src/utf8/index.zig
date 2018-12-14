@@ -21,15 +21,9 @@ const mask2: i32 = 0x1F; // 0001 1111
 const mask3: i32 = 0x0F; // 0000 1111
 const mask4: i32 = 0x07; // 0000 0111
 
-// TODO: investigate this because for some reason the expression produced wrong
-// values, I have hardcoded the values as a work around.
-//
-// rune1Max = 1<<7 - 1
-// rune2Max = 1<<11 - 1
-// rune3Max = 1<<16 - 1
-const rune1Max: i32 = 127;
-const rune2Max: i32 = 2047;
-const rune3Max: i32 = 65535;
+const rune1Max = (1 << 7) - 1;
+const rune2Max = (1 << 11) - 1;
+const rune3Max = (1 << 16) - 1;
 
 // The default lowest and highest continuation byte.
 const locb: u8 = 0x80; // 1000 0000
