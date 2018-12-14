@@ -1,4 +1,3 @@
-const warn = @import("std").debug.warn;
 const assert = @import("std").debug.assert;
 
 pub const rune_error: i32 = 0xfffd;
