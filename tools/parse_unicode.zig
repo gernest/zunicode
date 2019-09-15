@@ -702,8 +702,8 @@ fn trimSpace(v: []const u8) []const u8 {
 
 var codes_db: [CHARCODE_MAX + 1]CCInfo = undefined;
 
-const unicode_data_file = "tools/data/UnicodeData.txt";
-const special_casing__file = "tools/data/SpecialCasing.txt";
+const unicode_data_file = "tools/unicode/UnicodeData.txt";
+const special_casing__file = "tools/unicode/SpecialCasing.txt";
 
 pub fn main() !void {
     var allocator = std.heap.direct_allocator;
