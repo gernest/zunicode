@@ -726,6 +726,32 @@ fn parseCaseFolding(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []con
     }
 }
 
+fn parseCompositionExclusion(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []const u8) !void {
+    var stream = &std.io.SliceInStream.init(data).stream;
+    var buf = &try std.Buffer.init(allocator, "");
+    defer buf.deinit();
+    var not_done = true;
+    var last_code: usize = 0;
+    while (not_done) {
+        try buf.resize(0);
+        if (std.io.readLineFrom(stream, buf)) |_| {} else |err| {
+            if (err != error.EndOfStream) {
+                return err;
+            }
+            not_done = false;
+        }
+        if (buf.len() == 0) continue;
+        const line = trimSpace(buf.toSlice());
+        if (line[0] == '#' or line[0] == '@') continue;
+        var pos: usize = 0;
+        while (pos < line.len and !ascii.isSpace(line[pos])) : (pos += 1) {}
+        const code = try std.fmt.parseInt(usize, line[0..pos], 16);
+        assert(code > 0 and code <= CHARCODE_MAX);
+        var ci = &unicode_db[code];
+        ci.is_excluded = true;
+    }
+}
+
 fn trimSpace(v: []const u8) []const u8 {
     var i: usize = 0;
     while (i < v.len and ascii.isSpace(v[i])) : (i += 1) {}
@@ -737,12 +763,13 @@ var codes_db: [CHARCODE_MAX + 1]CCInfo = undefined;
 const unicode_data_file = "tools/unicode/UnicodeData.txt";
 const special_casing__file = "tools/unicode/SpecialCasing.txt";
 const case_folding__file = "tools/unicode/CaseFolding.txt";
+const composition_exclusion__file = "tools/unicode/CompositionExclusions.txt";
 
 pub fn main() !void {
     var allocator = std.heap.direct_allocator;
     const data = try std.io.readFileAlloc(allocator, unicode_data_file);
 
-    try parseUnicodeData(&arena.allocator, codes_db[0..], data);
+    try parseUnicodeData(allocator, codes_db[0..], data);
     allocator.free(data);
 
     const specia_case_data = try std.io.readFileAlloc(allocator, special_casing__file);
@@ -752,4 +779,8 @@ pub fn main() !void {
     const case_folding_data = try std.io.readFileAlloc(allocator, case_folding__file);
     try parseCaseFolding(allocator, codes_db[0..], case_folding_data);
     allocator.free(specia_case_data);
+
+    const composition_exclusion__data = try std.io.readFileAlloc(allocator, composition_exclusion__file);
+    try parseCompositionExclusion(allocator, codes_db[0..], composition_exclusion__data);
+    allocator.free(composition_exclusion__data);
 }
