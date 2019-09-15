@@ -426,7 +426,7 @@ const CCInfo = struct {
     l_len: usize,
     u_data: [CC_LEN_MAX]usize,
     l_data: [CC_LEN_MAX]usize,
-    f_code: isize,
+    f_code: usize,
     is_compat: bool,
     is_excluded: bool,
     general_category: usize,
@@ -518,9 +518,7 @@ fn parseUnicodeData(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []con
             }
             not_done = false;
         }
-        if (buf.len() == 0) {
-            return;
-        }
+        if (buf.len() == 0) continue;
         const line = trimSpace(buf.toSlice());
         if (line[0] == '#') continue;
         var field = getField(line, 0);
@@ -629,9 +627,7 @@ fn parseSpecialCasing(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []c
             }
             not_done = false;
         }
-        if (buf.len() == 0) {
-            return;
-        }
+        if (buf.len() == 0) continue;
         const line = trimSpace(buf.toSlice());
         if (line[0] == '#') continue;
 
@@ -652,15 +648,17 @@ fn parseSpecialCasing(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []c
         field = getField(line, 1);
         if (field != null) {
             ci.l_len = 0;
-            var tmp: [1]u8 = undefined;
-            for (field.?) |value| {
-                if (ascii.isSpace(value)) {
-                    continue;
-                }
+            var value = trimSpace(field.?);
+            var pos: usize = 0;
+            while (pos < value.len) {
+                var x = pos;
+                while (x < value.len and !ascii.isSpace(value[x])) : (x += 1) {}
+                var v = value[pos..x];
+                pos = x;
+                while (pos < value.len and ascii.isSpace(value[pos])) : (pos += 1) {}
                 assert(ci.l_len < CC_LEN_MAX);
                 ci.l_len += 1;
-                tmp[0] = value;
-                ci.l_data[ci.l_len] = try std.fmt.parseInt(usize, tmp[0..], 16);
+                ci.l_data[ci.l_len] = try std.fmt.parseInt(usize, v, 16);
             }
             if (ci.l_len == 1 and ci.l_data[0] == code) {
                 ci.l_len = 0;
@@ -670,15 +668,17 @@ fn parseSpecialCasing(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []c
         field = getField(line, 3);
         if (field != null) {
             ci.u_len = 0;
-            var tmp: [1]u8 = undefined;
-            for (field.?) |value| {
-                if (ascii.isSpace(value)) {
-                    continue;
-                }
+            var value = trimSpace(field.?);
+            var pos: usize = 0;
+            while (pos < value.len) {
+                var x = pos;
+                while (x < value.len and !ascii.isSpace(value[x])) : (x += 1) {}
+                var v = value[pos..x];
+                pos = x;
+                while (pos < value.len and ascii.isSpace(value[pos])) : (pos += 1) {}
                 assert(ci.u_len < CC_LEN_MAX);
                 ci.u_len += 1;
-                tmp[0] = value;
-                ci.u_data[ci.u_len] = try std.fmt.parseInt(usize, tmp[0..], 16);
+                ci.u_data[ci.l_len] = try std.fmt.parseInt(usize, v, 16);
             }
             if (ci.u_len == 1 and ci.u_data[0] == code) {
                 ci.u_len = 0;
@@ -687,16 +687,48 @@ fn parseSpecialCasing(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []c
     }
 }
 
-fn trimSpace(v: []const u8) []const u8 {
-    if (v.len == 0) return v;
-    if (!ascii.isSpace(v[0])) return v;
-    var i: usize = 0;
-    while (i < v.len) {
-        if (!ascii.isSpace(v[0])) {
-            break;
+fn parseCaseFolding(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []const u8) !void {
+    var stream = &std.io.SliceInStream.init(data).stream;
+    var buf = &try std.Buffer.init(allocator, "");
+    defer buf.deinit();
+    var not_done = true;
+    var last_code: usize = 0;
+    while (not_done) {
+        try buf.resize(0);
+        if (std.io.readLineFrom(stream, buf)) |_| {} else |err| {
+            if (err != error.EndOfStream) {
+                return err;
+            }
+            not_done = false;
         }
-        i += 1;
+        if (buf.len() == 0) continue;
+        const line = buf.toSlice();
+        if (line[0] == '#') continue;
+
+        var field = getField(line, 0);
+        if (field == null) {
+            continue;
+        }
+        const code = try std.fmt.parseInt(usize, field.?, 16);
+        assert(code <= CHARCODE_MAX);
+        var ci = &unicode_db[code];
+
+        field = getField(line, 1);
+        if (field == null) continue;
+        var value = trimSpace(field.?);
+        if (value[0] != 'C' and value[0] != 'S') continue;
+
+        field = getField(line, 2);
+        assert(field != null);
+        assert(ci.f_code == 0);
+        ci.f_code = try std.fmt.parseInt(usize, trimSpace(field.?), 16);
+        assert(ci.f_code != 0 and ci.f_code != code);
     }
+}
+
+fn trimSpace(v: []const u8) []const u8 {
+    var i: usize = 0;
+    while (i < v.len and ascii.isSpace(v[i])) : (i += 1) {}
     return v[i..];
 }
 
@@ -704,17 +736,20 @@ var codes_db: [CHARCODE_MAX + 1]CCInfo = undefined;
 
 const unicode_data_file = "tools/unicode/UnicodeData.txt";
 const special_casing__file = "tools/unicode/SpecialCasing.txt";
+const case_folding__file = "tools/unicode/CaseFolding.txt";
 
 pub fn main() !void {
     var allocator = std.heap.direct_allocator;
-    var arena = std.heap.ArenaAllocator.init(allocator);
     const data = try std.io.readFileAlloc(allocator, unicode_data_file);
-    defer allocator.free(data);
-    defer arena.deinit();
 
     try parseUnicodeData(&arena.allocator, codes_db[0..], data);
+    allocator.free(data);
 
     const specia_case_data = try std.io.readFileAlloc(allocator, special_casing__file);
-    defer allocator.free(specia_case_data);
-    try parseSpecialCasing(&arena.allocator, codes_db[0..], specia_case_data);
+    try parseSpecialCasing(allocator, codes_db[0..], specia_case_data);
+    allocator.free(specia_case_data);
+
+    const case_folding_data = try std.io.readFileAlloc(allocator, case_folding__file);
+    try parseCaseFolding(allocator, codes_db[0..], case_folding_data);
+    allocator.free(specia_case_data);
 }
