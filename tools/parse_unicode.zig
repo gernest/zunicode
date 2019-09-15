@@ -422,10 +422,10 @@ const CC_LEN_MAX = 3;
 
 const CCInfo = struct {
     combining_class: isize,
-    u_len: u8,
-    l_len: u8,
-    u_data: [CC_LEN_MAX]isize,
-    l_data: [CC_LEN_MAX]isize,
+    u_len: usize,
+    l_len: usize,
+    u_data: [CC_LEN_MAX]usize,
+    l_data: [CC_LEN_MAX]usize,
     f_code: isize,
     is_compat: bool,
     is_excluded: bool,
@@ -439,8 +439,8 @@ const CCInfo = struct {
             .combining_class = 0,
             .u_len = 0,
             .l_len = 0,
-            .u_data = [_]isize{0} ** CC_LEN_MAX,
-            .l_data = [_]isize{0} ** CC_LEN_MAX,
+            .u_data = [_]usize{0} ** CC_LEN_MAX,
+            .l_data = [_]usize{0} ** CC_LEN_MAX,
             .f_code = 0,
             .is_compat = false,
             .is_excluded = false,
@@ -521,22 +521,22 @@ fn parseUnicodeData(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []con
         if (buf.len() == 0) {
             return;
         }
-        const line = buf.toSlice();
+        const line = trimSpace(buf.toSlice());
         if (line[0] == '#') continue;
         var field = getField(line, 0);
         if (field == null) {
             continue;
         }
         const code = try std.fmt.parseInt(usize, field.?, 16);
-        var uc: isize = 0;
+        var uc: usize = 0;
         field = getField(line, 12);
         if (field) |value| {
-            uc = try std.fmt.parseInt(isize, value, 16);
+            uc = try std.fmt.parseInt(usize, value, 16);
         }
-        var lc: isize = 0;
+        var lc: usize = 0;
         field = getField(line, 13);
         if (field) |value| {
-            lc = try std.fmt.parseInt(isize, value, 16);
+            lc = try std.fmt.parseInt(usize, value, 16);
         }
         var ci = &unicode_db[code];
         ci.* = CCInfo.init(allocator);
@@ -615,9 +615,95 @@ fn parseUnicodeData(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []con
     }
 }
 
+fn parseSpecialCasing(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []const u8) !void {
+    var stream = &std.io.SliceInStream.init(data).stream;
+    var buf = &try std.Buffer.init(allocator, "");
+    defer buf.deinit();
+    var not_done = true;
+    var last_code: usize = 0;
+    while (not_done) {
+        try buf.resize(0);
+        if (std.io.readLineFrom(stream, buf)) |_| {} else |err| {
+            if (err != error.EndOfStream) {
+                return err;
+            }
+            not_done = false;
+        }
+        if (buf.len() == 0) {
+            return;
+        }
+        const line = trimSpace(buf.toSlice());
+        if (line[0] == '#') continue;
+
+        var field = getField(line, 0);
+        if (field == null) {
+            continue;
+        }
+        const code = try std.fmt.parseInt(usize, field.?, 16);
+        assert(code <= CHARCODE_MAX);
+        var ci = &unicode_db[code];
+        field = getField(line, 4);
+        if (field != null) {
+            const value = trimSpace(field.?);
+            if (value.len > 0 and value[0] != '#') {
+                continue;
+            }
+        }
+        field = getField(line, 1);
+        if (field != null) {
+            ci.l_len = 0;
+            var tmp: [1]u8 = undefined;
+            for (field.?) |value| {
+                if (ascii.isSpace(value)) {
+                    continue;
+                }
+                assert(ci.l_len < CC_LEN_MAX);
+                ci.l_len += 1;
+                tmp[0] = value;
+                ci.l_data[ci.l_len] = try std.fmt.parseInt(usize, tmp[0..], 16);
+            }
+            if (ci.l_len == 1 and ci.l_data[0] == code) {
+                ci.l_len = 0;
+            }
+        }
+
+        field = getField(line, 3);
+        if (field != null) {
+            ci.u_len = 0;
+            var tmp: [1]u8 = undefined;
+            for (field.?) |value| {
+                if (ascii.isSpace(value)) {
+                    continue;
+                }
+                assert(ci.u_len < CC_LEN_MAX);
+                ci.u_len += 1;
+                tmp[0] = value;
+                ci.u_data[ci.u_len] = try std.fmt.parseInt(usize, tmp[0..], 16);
+            }
+            if (ci.u_len == 1 and ci.u_data[0] == code) {
+                ci.u_len = 0;
+            }
+        }
+    }
+}
+
+fn trimSpace(v: []const u8) []const u8 {
+    if (v.len == 0) return v;
+    if (!ascii.isSpace(v[0])) return v;
+    var i: usize = 0;
+    while (i < v.len) {
+        if (!ascii.isSpace(v[0])) {
+            break;
+        }
+        i += 1;
+    }
+    return v[i..];
+}
+
 var codes_db: [CHARCODE_MAX + 1]CCInfo = undefined;
 
 const unicode_data_file = "tools/data/UnicodeData.txt";
+const special_casing__file = "tools/data/SpecialCasing.txt";
 
 pub fn main() !void {
     var allocator = std.heap.direct_allocator;
@@ -627,4 +713,8 @@ pub fn main() !void {
     defer arena.deinit();
 
     try parseUnicodeData(&arena.allocator, codes_db[0..], data);
+
+    const specia_case_data = try std.io.readFileAlloc(allocator, special_casing__file);
+    defer allocator.free(specia_case_data);
+    try parseSpecialCasing(&arena.allocator, codes_db[0..], specia_case_data);
 }
