@@ -522,6 +522,7 @@ fn parseUnicodeData(allocator: *mem.Allocator, unicode_db: []CCInfo, data: []con
             return;
         }
         const line = buf.toSlice();
+        if (line[0] == '#') continue;
         var field = getField(line, 0);
         if (field == null) {
             continue;
