@@ -1,6 +1,9 @@
 pub const tables = @import("tables.zig");
 const warn = @import("std").debug.warn;
 
+pub const utf8 = @import("./utf8/index.zig");
+pub const utf16 = @import("./utf16/index.zig");
+
 pub fn is16(ranges: []const tables.Range16, r: u16) bool {
     if (ranges.len <= tables.linear_max or r <= tables.linear_max) {
         for (ranges) |*range| {

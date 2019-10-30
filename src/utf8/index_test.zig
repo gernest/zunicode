@@ -1,5 +1,5 @@
 const std = @import("std");
-const unicode = @import("../unicode.zig");
+const unicode = @import("../zunicode.zig");
 const utf8 = @import("index.zig");
 
 const t = std.testing;

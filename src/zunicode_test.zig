@@ -1,6 +1,6 @@
 const std = @import("std");
 const tables = @import("tables.zig");
-const unicode = @import("unicode.zig");
+const unicode = @import("zunicode.zig");
 
 const testing = std.testing;
 
