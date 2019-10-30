@@ -1,6 +1,6 @@
 const std = @import("std");
-const unicode = @import("../zunicode.zig");
-const utf16 = @import("index.zig");
+const unicode = @import("zunicode.zig");
+const utf16 = @import("utf16.zig");
 
 const mem = std.mem;
 const testing = std.testing;
