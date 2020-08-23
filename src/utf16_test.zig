@@ -15,22 +15,22 @@ const encodeTest = struct {
 };
 
 const encode_tests = [_]encodeTest{
-    encodeTest{ .in = [_]i32{ 1, 2, 3, 4 }, .out = [_]u16{ 1, 2, 3, 4 } },
+    encodeTest{ .in = &[_]i32{ 1, 2, 3, 4 }, .out = &[_]u16{ 1, 2, 3, 4 } },
     encodeTest{
-        .in = [_]i32{ 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff },
-        .out = [_]u16{ 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff },
+        .in = &[_]i32{ 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff },
+        .out = &[_]u16{ 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff },
     },
     encodeTest{
-        .in = [_]i32{ 'a', 'b', 0xd7ff, 0xd800, 0xdfff, 0xe000, 0x110000, -1 },
-        .out = [_]u16{ 'a', 'b', 0xd7ff, 0xfffd, 0xfffd, 0xe000, 0xfffd, 0xfffd },
+        .in = &[_]i32{ 'a', 'b', 0xd7ff, 0xd800, 0xdfff, 0xe000, 0x110000, -1 },
+        .out = &[_]u16{ 'a', 'b', 0xd7ff, 0xfffd, 0xfffd, 0xe000, 0xfffd, 0xfffd },
     },
 };
 
 test "encode" {
-    var a = std.debug.global_allocator;
+    var a = std.testing.allocator;
     for (encode_tests) |ts, i| {
         const value = try utf16.encode(a, ts.in);
-        testing.expectEqualSlices(u16, ts.out, value.toSliceConst());
+        testing.expectEqualSlices(u16, ts.out, value.items);
         value.deinit();
     }
 }

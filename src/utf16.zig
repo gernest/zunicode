@@ -66,15 +66,15 @@ pub fn encode(allocator: *mem.Allocator, s: []const i32) !ArrayUTF16 {
     n = 0;
     for (s) |v, id| {
         if (0 <= v and v < surr1 or surr3 <= v and v < surrSelf) {
-            list.set(n, @intCast(u16, v));
+            list.items[n] = @intCast(u16, v);
             n += 1;
         } else if (surrSelf <= v and v <= max_rune) {
             const r = encodeRune(v);
-            list.set(n, @intCast(u16, r.r1));
-            list.set(n + 1, @intCast(u16, r.r2));
+            list.items[n] = @intCast(u16, r.r1);
+            list.items[n + 1] = @intCast(u16, r.r2);
             n += 2;
         } else {
-            list.set(n, @intCast(u16, replacement_rune));
+            list.items[n] = @intCast(u16, replacement_rune);
             n += 1;
         }
     }
@@ -93,13 +93,13 @@ pub fn decode(a: *mem.Allocator, s: []u16) !ArrayUTF8 {
         const r = @intCast(i32, s[i]);
         if (r < surr1 or surr3 <= r) {
             //normal rune
-            list.set(n, r);
+            list.items[n] = r;
         } else if (surr1 <= r and r < surr2 and i + 1 < len(s) and surr2 <= s[i + 1] and s[i + 1] < surr3) {
             // valid surrogate sequence
-            list.set(n, decodeRune(r, @intCast(i32, s[i + 1])));
+            list.items[n] = decodeRune(r, @intCast(i32, s[i + 1]));
             i += 1;
         } else {
-            list.set(n, replacement_rune);
+            list.items[n] = replacement_rune;
         }
         n += 1;
     }
