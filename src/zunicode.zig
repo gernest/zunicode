@@ -33,7 +33,7 @@ pub fn is16(ranges: []const tables.Range16, r: u16) bool {
     return false;
 }
 
-pub fn is32(ranges: []tables.Range32, r: u32) bool {
+pub fn is32(ranges: []const tables.Range32, r: u32) bool {
     if (ranges.len <= tables.linear_max) {
         for (ranges) |*range| {
             if (r < range.lo) {
@@ -115,7 +115,7 @@ const toResult = struct {
     found_mapping: bool,
 };
 
-fn to_case(_case: tables.Case, rune: i32, case_range: []tables.CaseRange) toResult {
+fn to_case(_case: tables.Case, rune: i32, case_range: []const tables.CaseRange) toResult {
     if (_case.rune() < 0 or tables.Case.Max.rune() <= _case.rune()) {
         return toResult{
             .mapped = tables.replacement_char,
@@ -165,7 +165,7 @@ fn to_case(_case: tables.Case, rune: i32, case_range: []tables.CaseRange) toResu
 
 // to maps the rune to the specified case: UpperCase, LowerCase, or TitleCase.
 pub fn to(case: tables.Case, rune: i32) i32 {
-    const v = to_case(case, rune, tables.CaseRanges);
+    const v = to_case(case, rune, &tables.CaseRanges);
     return v.mapped;
 }
 
@@ -249,11 +249,11 @@ pub fn simpleFold(r: u32) u32 {
 }
 
 pub const graphic_ranges = [_]*const tables.RangeTable{
-    tables.L, tables.M, tables.N, tables.P, tables.S, tables.Zs,
+    &tables.L, &tables.M, &tables.N, &tables.P, &tables.S, &tables.Zs,
 };
 
 pub const print_ranges = [_]*const tables.RangeTable{
-    tables.L, tables.M, tables.N, tables.P, tables.S,
+    &tables.L, &tables.M, &tables.N, &tables.P, &tables.S,
 };
 
 pub fn in(r: i32, ranges: []const *const tables.RangeTable) bool {
@@ -337,7 +337,7 @@ pub fn isPunct(r: i32) bool {
 // this is
 //  '\t', '\n', '\v', '\f', '\r', ' ', U+0085 (NEL), U+00A0 (NBSP).
 // Other definitions of spacing characters are set by category
-// Z and property Pattern_White_Space.
+// Z and property Pattern_white_space.
 pub fn isSpace(r: i32) bool {
     if (r <= tables.max_latin1) {
         switch (r) {
@@ -345,7 +345,7 @@ pub fn isSpace(r: i32) bool {
             else => return false,
         }
     }
-    return isExcludingLatin(tables.White_Space, r);
+    return isExcludingLatin(&tables.white_space, r);
 }
 
 // IsSymbol reports whether the rune is a symbolic character.
