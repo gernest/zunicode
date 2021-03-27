@@ -92,14 +92,14 @@ const case_test = [_]caseT{
     caseT.init(tables.Case.Title, '7', '7'),
     // Latin-1: easy to read the tests!
     caseT.init(tables.Case.Upper, 0x80, 0x80),
-    // caseT.init(tables.Case.Upper, 'Å', 'Å'),
-    // caseT.init(tables.Case.Upper, 'å', 'Å'),
+    caseT.init(tables.Case.Upper, 'Å', 'Å'),
+    caseT.init(tables.Case.Upper, 'å', 'Å'),
     caseT.init(tables.Case.Lower, 0x80, 0x80),
-    // caseT.init(tables.Case.Lower, 'Å', 'å'),
-    // caseT.init(tables.Case.Lower, 'å', 'å'),
+    caseT.init(tables.Case.Lower, 'Å', 'å'),
+    caseT.init(tables.Case.Lower, 'å', 'å'),
     caseT.init(tables.Case.Title, 0x80, 0x80),
-    // caseT.init(tables.Case.Title, 'Å', 'Å'),
-    // caseT.init(tables.Case.Title, 'å', 'Å'),
+    caseT.init(tables.Case.Title, 'Å', 'Å'),
+    caseT.init(tables.Case.Title, 'å', 'Å'),
 
     // 0131;LATIN SMALL LETTER DOTLESS I;Ll;0;L;;;;;N;;;0049;;0049
     caseT.init(tables.Case.Upper, 0x0131, 'I'),
@@ -313,7 +313,7 @@ test "isSpaceLatin1" {
     var i: i32 = 0;
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isSpace(i);
-        const want = unicode.is(tables.White_Space, i);
+        const want = unicode.is(&tables.white_space, i);
         testing.expectEqual(want, got);
     }
 }
