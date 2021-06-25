@@ -55,14 +55,14 @@ const notupperTest = [_]i32{
 };
 
 test "isUpper" {
-    for (upper_test) |r, i| {
-        testing.expect(unicode.isUpper(r));
+    for (upper_test) |r| {
+        try testing.expect(unicode.isUpper(r));
     }
-    for (notupperTest) |r, i| {
-        testing.expect(!unicode.isUpper(r));
+    for (notupperTest) |r| {
+        try testing.expect(!unicode.isUpper(r));
     }
-    for (notletterTest) |r, i| {
-        testing.expect(!unicode.isUpper(r));
+    for (notletterTest) |r| {
+        try testing.expect(!unicode.isUpper(r));
     }
 }
 
@@ -187,11 +187,11 @@ const case_test = [_]caseT{
 };
 
 test "toUpper" {
-    for (case_test) |c, idx| {
+    for (case_test) |c| {
         switch (c.case) {
             tables.Case.Upper => {
                 const r = unicode.toUpper(c.in);
-                testing.expectEqual(c.out, r);
+                try testing.expectEqual(c.out, r);
             },
             else => {},
         }
@@ -199,11 +199,11 @@ test "toUpper" {
 }
 
 test "toLower" {
-    for (case_test) |c, idx| {
+    for (case_test) |c| {
         switch (c.case) {
             tables.Case.Lower => {
                 const r = unicode.toLower(c.in);
-                testing.expectEqual(c.out, r);
+                try testing.expectEqual(c.out, r);
             },
             else => {},
         }
@@ -211,11 +211,11 @@ test "toLower" {
 }
 
 test "toLower" {
-    for (case_test) |c, idx| {
+    for (case_test) |c| {
         switch (c.case) {
             tables.Case.Title => {
                 const r = unicode.toTitle(c.in);
-                testing.expectEqual(c.out, r);
+                try testing.expectEqual(c.out, r);
             },
             else => {},
         }
@@ -225,7 +225,7 @@ test "toLower" {
 test "to" {
     for (case_test) |c| {
         const r = unicode.to(c.case, c.in);
-        testing.expectEqual(c.out, r);
+        try testing.expectEqual(c.out, r);
     }
 }
 
@@ -239,7 +239,7 @@ test "isControlLatin1" {
         } else if (0x7F <= i and i <= 0x9F) {
             want = true;
         }
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -248,7 +248,7 @@ test "isLetterLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isLetter(i);
         const want = unicode.is(tables.Letter, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -257,7 +257,7 @@ test "isUpperLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isUpper(i);
         const want = unicode.is(tables.Upper, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -266,7 +266,7 @@ test "isLowerLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isLower(i);
         const want = unicode.is(tables.Lower, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -275,7 +275,7 @@ test "isNumberLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isNumber(i);
         const want = unicode.is(tables.Number, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -287,7 +287,7 @@ test "isPrintLatin1" {
         if (i == ' ') {
             want = true;
         }
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -296,7 +296,7 @@ test "isGraphicLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isGraphic(i);
         var want = unicode.in(i, unicode.graphic_ranges[0..]);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -305,7 +305,7 @@ test "isPunctLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isPunct(i);
         const want = unicode.is(tables.Punct, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -314,7 +314,7 @@ test "isSpaceLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isSpace(i);
         const want = unicode.is(tables.White_Space, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -323,7 +323,7 @@ test "isSymbolLatin1" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isSymbol(i);
         const want = unicode.is(tables.Symbol, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
 
@@ -423,11 +423,11 @@ const test_letter = [_]i32{
 
 test "isDigit" {
     for (test_digit) |r| {
-        testing.expect(unicode.isDigit(r));
+        try testing.expect(unicode.isDigit(r));
     }
 
     for (test_letter) |r| {
-        testing.expect(!unicode.isDigit(r));
+        try testing.expect(!unicode.isDigit(r));
     }
 }
 
@@ -436,6 +436,6 @@ test "DigitOptimization" {
     while (i <= tables.max_latin1) : (i += 1) {
         const got = unicode.isDigit(i);
         const want = unicode.is(tables.Digit, i);
-        testing.expectEqual(want, got);
+        try testing.expectEqual(want, got);
     }
 }
