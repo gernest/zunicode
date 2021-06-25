@@ -5,8 +5,8 @@ const utf8 = @import("utf8.zig");
 const t = std.testing;
 
 test "init" {
-    t.expectEqual(utf8.max_rune, unicode.tables.max_rune);
-    t.expectEqual(utf8.rune_error, unicode.tables.replacement_char);
+    try t.expectEqual(utf8.max_rune, unicode.tables.max_rune);
+    try t.expectEqual(utf8.rune_error, unicode.tables.replacement_char);
 }
 
 const Utf8Map = struct {
@@ -69,34 +69,33 @@ const test_strings = [][]const u8{
 
 test "fullRune" {
     for (utf8_map) |m| {
-        t.expectEqual(true, utf8.fullRune(m.str));
+        try t.expectEqual(true, utf8.fullRune(m.str));
     }
     const sample = [_][]const u8{ "\xc0", "\xc1" };
     for (sample) |m| {
-        t.expectEqual(true, utf8.fullRune(m));
+        try t.expectEqual(true, utf8.fullRune(m));
     }
 }
 
 test "encodeRune" {
-    for (utf8_map) |m, idx| {
+    for (utf8_map) |m| {
         var buf = [_]u8{0} ** 10;
         const n = try utf8.encodeRune(buf[0..], m.r);
-        const ok = std.mem.eql(u8, buf[0..n], m.str);
-        t.expectEqualSlices(u8, m.str, buf[0..n]);
+        try t.expectEqualSlices(u8, m.str, buf[0..n]);
     }
 }
 
 test "decodeRune" {
     for (utf8_map) |m| {
         const r = try utf8.decodeRune(m.str);
-        t.expectEqual(m.r, r.value);
-        t.expectEqual(m.str.len, r.size);
+        try t.expectEqual(m.r, r.value);
+        try t.expectEqual(m.str.len, r.size);
     }
 }
 
 test "surrogateRune" {
     for (surrogete_map) |m| {
-        t.expectError(error.RuneError, utf8.decodeRune(m.str));
+        try t.expectError(error.RuneError, utf8.decodeRune(m.str));
     }
 }
 
@@ -104,25 +103,25 @@ test "Iterator" {
     const source = "a,b,c";
     var iter = utf8.Iterator.init(source);
     var a = try iter.next();
-    t.expect(a != null);
-    t.expect('a' == a.?.value);
+    try t.expect(a != null);
+    try t.expect('a' == a.?.value);
     _ = try iter.next();
 
     a = try iter.next();
-    t.expect(a != null);
+    try t.expect(a != null);
 
-    t.expect(a != null);
-    t.expect('b' == a.?.value);
+    try t.expect(a != null);
+    try t.expect('b' == a.?.value);
     _ = try iter.next();
     _ = try iter.next();
     a = try iter.next();
-    t.expect(a == null);
+    try t.expect(a == null);
 
     iter.reset(0);
     a = try iter.peek();
-    t.expect(a != null);
+    try t.expect(a != null);
 
     const b = try iter.next();
-    t.expect(b != null);
-    t.expectEqual(a.?.value, b.?.value);
+    try t.expect(b != null);
+    try t.expectEqual(a.?.value, b.?.value);
 }

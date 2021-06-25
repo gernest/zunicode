@@ -64,7 +64,7 @@ pub fn encode(allocator: *mem.Allocator, s: []const i32) !ArrayUTF16 {
     var list = ArrayUTF16.init(allocator);
     try list.resize(n);
     n = 0;
-    for (s) |v, id| {
+    for (s) |v| {
         if (0 <= v and v < surr1 or surr3 <= v and v < surrSelf) {
             list.items[n] = @intCast(u16, v);
             n += 1;
@@ -78,7 +78,7 @@ pub fn encode(allocator: *mem.Allocator, s: []const i32) !ArrayUTF16 {
             n += 1;
         }
     }
-    list.shrink(n);
+    list.shrinkAndFree(n);
     return list;
 }
 

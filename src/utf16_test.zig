@@ -6,7 +6,7 @@ const mem = std.mem;
 const testing = std.testing;
 
 test "constants" {
-    testing.expectEqual(utf16.max_rune, unicode.tables.max_rune);
+    try testing.expectEqual(utf16.max_rune, unicode.tables.max_rune);
 }
 
 const encodeTest = struct {
@@ -28,28 +28,28 @@ const encode_tests = [_]encodeTest{
 
 test "encode" {
     var a = std.testing.allocator;
-    for (encode_tests) |ts, i| {
+    for (encode_tests) |ts| {
         const value = try utf16.encode(a, ts.in);
-        testing.expectEqualSlices(u16, ts.out, value.items);
+        try testing.expectEqualSlices(u16, ts.out, value.items);
         value.deinit();
     }
 }
 
 test "encodeRune" {
-    for (encode_tests) |tt, i| {
+    for (encode_tests) |tt| {
         var j: usize = 0;
         for (tt.in) |r| {
             const pair = utf16.encodeRune(r);
             if (r < 0x10000 or r > unicode.tables.max_rune) {
-                testing.expect(!(j >= tt.out.len));
-                testing.expect(!(pair.r1 != unicode.tables.replacement_char or pair.r2 != unicode.tables.replacement_char));
+                try testing.expect(!(j >= tt.out.len));
+                try testing.expect(!(pair.r1 != unicode.tables.replacement_char or pair.r2 != unicode.tables.replacement_char));
                 j += 1;
             } else {
-                testing.expect(!(j >= tt.out.len));
-                testing.expect(!(pair.r1 != @intCast(i32, tt.out[j]) or pair.r2 != @intCast(i32, tt.out[j + 1])));
+                try testing.expect(!(j >= tt.out.len));
+                try testing.expect(!(pair.r1 != @intCast(i32, tt.out[j]) or pair.r2 != @intCast(i32, tt.out[j + 1])));
                 j += 2;
                 const dec = utf16.decodeRune(pair.r1, pair.r2);
-                testing.expectEqual(r, dec);
+                try testing.expectEqual(r, dec);
             }
         }
     }

@@ -235,7 +235,7 @@ pub fn simpleFold(r: u32) u32 {
             hi = m;
         }
     }
-    if (lo < tables.caseOrbit.len and @intCast(tables.caseOrbit[lo].from) == r) {
+    if (lo < tables.caseOrbit.len and @intCast(u32, tables.caseOrbit[lo].from) == r) {
         return @intCast(u32, tables.caseOrbit[lo].to);
     }
     // No folding specified. This is a one- or two-element
