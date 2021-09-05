@@ -94,7 +94,7 @@ pub fn decode(a: *mem.Allocator, s: []u16) !ArrayUTF8 {
         if (r < surr1 or surr3 <= r) {
             //normal rune
             list.items[n] = r;
-        } else if (surr1 <= r and r < surr2 and i + 1 < len(s) and surr2 <= s[i + 1] and s[i + 1] < surr3) {
+        } else if (surr1 <= r and r < surr2 and i + 1 < s.len and surr2 <= s[i + 1] and s[i + 1] < surr3) {
             // valid surrogate sequence
             list.items[n] = decodeRune(r, @intCast(i32, s[i + 1]));
             i += 1;

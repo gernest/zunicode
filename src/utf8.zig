@@ -351,7 +351,7 @@ pub fn valid(p: []const u8) bool {
     var i: usize = 0;
     while (i < n) {
         const pi = p[i];
-        if (@intCast(u32, c) < rune_self) {
+        if (@intCast(u32, pi) < rune_self) {
             i += 1;
             continue;
         }

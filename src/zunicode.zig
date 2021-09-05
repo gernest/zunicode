@@ -226,7 +226,7 @@ pub fn simpleFold(r: u32) u32 {
         return @intCast(u32, tables.asciiFold[idx]);
     }
     var lo: usize = 0;
-    var hi = caseOrbit.len;
+    var hi = tables.caseOrbit.len;
     while (lo < hi) {
         const m = lo + (hi - lo) / 2;
         if (@intCast(u32, tables.caseOrbit[m].from) < r) {
